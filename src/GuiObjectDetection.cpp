@@ -18,19 +18,19 @@
 GuiObjectDetection::GuiObjectDetection(int argc, char* argv[], unsigned int n_label, unsigned int n_rbutton, QWidget* parent)
 : QWidget(parent)
 {
+	mainGridBox = new QGridLayout();
+
 		//Setup the interface ROS/Qt
 	InterfaceROSGUI = new InterfaceROS(argc,argv);
 	connect(InterfaceROSGUI, 	SIGNAL(newInputData(const int&, const QVector<double>&, const QVector<double>&)),
 				 	this, 						SLOT(updateRFData(const int&, const QVector<double>&, const QVector<double>&))
-					);
-
-	
+					);	
 
 		//Create Rviz panel
-	rvizPanel = new rviz::VisualizationFrame;
+	rvizPanel = new rviz::VisualizationFrame();
 
 		//Create Plotting panel
-	rfPlotIntensity = new QwtPlot(QwtText("Intensity map from RF sensor"), parent);
+	rfPlotIntensity = new QwtPlot(QwtText("Intensity map from RF sensor"));
 	rfPlotIntensity->setAxisTitle(QwtPlot::xBottom, "Angle en Degree");
 	rfPlotIntensity->setAxisScale(QwtPlot::xBottom, 180, -180);
 	rfPlotIntensity->setAxisTitle(QwtPlot::yLeft, "<FONT color=#0000ff  face=Arial size=4><B>  Detected Intensity  </FONT>");
@@ -68,8 +68,8 @@ GuiObjectDetection::GuiObjectDetection(int argc, char* argv[], unsigned int n_la
 		labels[i] = new QLabel(num.c_str());
 	}
 	
-	vBoxParam = new QVBoxLayout;
-	mainGridBox = new QGridLayout;
+	vBoxParam = new QVBoxLayout();
+	
 		
 	GUI_OK = 0;
 }

@@ -40,6 +40,8 @@ class InterfaceROS: public QThread
 		ros::NodeHandle* n;
 		ros::Subscriber chatter_pub_gauss;
 		ros::Rate *loop_rate;
+		int argc_;
+		char** argv_;
 		bool endThreadRos;
 
 			//callback ROS		

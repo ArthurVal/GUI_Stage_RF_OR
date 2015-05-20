@@ -7,12 +7,8 @@
 InterfaceROS::InterfaceROS(int argc, char* argv[], QWidget* parent)
 : QThread(parent)
 {
-	if( !ros::isInitialized() ){
-		ROS_INFO("[Interface ROS-GUI node] Initialization of node : Interface_ROS-GUI_node");
-		ros::init(argc, argv, "Interface_ROS_GUI_node");
-	}	
-	n = new ros::NodeHandle;
-	loop_rate = new ros::Rate(ROS_GUI_FREQ);
+	argc_ = argc;
+	argv_ = argv;
 	endThreadRos = false;
 }
 
@@ -59,7 +55,14 @@ void InterfaceROS::run()
 {
 	ROS_INFO("Starting Thread Interface ROS-GUI");
 
-	qRegisterMetaType< QVector<float> >("QVector<float>");
+	
+	ROS_INFO("[Interface ROS-GUI node] Initialization of node : Interface_ROS-GUI_node");
+	ros::init(argc_, argv_, "Interface_ROS_GUI_node");
+		
+	n = new ros::NodeHandle;
+	loop_rate = new ros::Rate(ROS_GUI_FREQ);
+
+	qRegisterMetaType< QVector<double> >("QVector<double>");
 
 	ROS_INFO("Subscribing to rf_riddle_intensity_map topic.");	
 	chatter_pub_gauss = n->subscribe("rf_riddle_intensity_map", 100, &InterfaceROS::callback_getRFData, this);
@@ -73,5 +76,9 @@ void InterfaceROS::run()
 		loop_rate->sleep();
 	}
 	this->exec();
-	ROS_INFO("[Interface ROS-GUI node] Shutdown of node : Interface_ROS-GUI_node");	
+
+	ROS_INFO("[Interface ROS-GUI node] Shutdown of node : Interface_ROS-GUI_node");
+
+	delete loop_rate;
+	delete n;	
 }

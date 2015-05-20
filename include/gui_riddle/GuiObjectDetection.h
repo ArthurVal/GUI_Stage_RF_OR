@@ -49,6 +49,7 @@ class GuiObjectDetection: public QWidget
 
 	private:
 			//Attributs
+		rviz::VisualizationManager *rvizManager;
 		rviz::VisualizationFrame *rvizPanel;		
 		QwtPlot *rfPlotIntensity;
 		QwtPlotCurve *curveIntensity;
