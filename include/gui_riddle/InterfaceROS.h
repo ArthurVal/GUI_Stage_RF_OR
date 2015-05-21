@@ -4,11 +4,13 @@
 #include <QtGui>
 #include <QObject>
 
+#include "nodeROSGUI.h"
+
 #include "ros/ros.h"
 #include "ros/node_handle.h"
-#include "rf_riddle/RF.h"
 
-#define ROS_GUI_FREQ 1
+
+#define ROS_GUI_FREQ 10
 
 	
 class InterfaceROS: public QThread
@@ -29,23 +31,22 @@ class InterfaceROS: public QThread
 			//Main function (ros spin)
 		void run();
 
+	signals:
+		void transfertInputDataToGUI(int index, const QVector<double> &x, const QVector<double> &y);
+
 	public slots:
 		void disableThread();
-
-	signals:
-		void newInputData(int index, const QVector<double> &x, const QVector<double> &y);
+		void newDataFromNodeROS(int index, const QVector<double> &x, const QVector<double> &y);
 
 	private:
 			//Attributs
 		ros::NodeHandle* n;
 		ros::Subscriber chatter_pub_gauss;
-		ros::Rate *loop_rate;
+		nodeROSGUI *nodeROS;
 		int argc_;
 		char** argv_;
 		bool endThreadRos;
 
-			//callback ROS		
-		void callback_getRFData(const rf_riddle::RF &rf_data);
 };
 
 #endif // INTERFACEROS_H

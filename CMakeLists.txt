@@ -119,10 +119,12 @@ set(CMAKE_BUILD_TYPE Debug)
 
 set(qt_srcs
       src/GuiObjectDetection.cpp
-			src/InterfaceROS.cpp)
+			src/InterfaceROS.cpp
+			src/nodeROSGUI.cpp)
 set(qt_hdrs
       include/${PROJECT_NAME}/GuiObjectDetection.h
-			include/${PROJECT_NAME}/InterfaceROS.h)
+			include/${PROJECT_NAME}/InterfaceROS.h
+			include/${PROJECT_NAME}/nodeROSGUI.h)
 
 qt4_automoc(${qt_srcs})
 QT4_WRAP_CPP(qt_moc_srcs ${qt_hdrs})
@@ -134,7 +136,7 @@ QT4_WRAP_CPP(qt_moc_srcs ${qt_hdrs})
 # )
 
 # Declare a cpp executable
- add_executable(gui_riddle ${qt_moc_srcs} src/InterfaceROS.cpp src/GuiObjectDetection.cpp src/main.cpp)
+ add_executable(gui_riddle ${qt_moc_srcs} src/nodeROSGUI.cpp src/InterfaceROS.cpp src/GuiObjectDetection.cpp src/main.cpp)
 
 # Add cmake target dependencies of the executable/library
 # as an example, message headers may need to be generated before nodes
