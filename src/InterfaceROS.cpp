@@ -16,6 +16,9 @@ InterfaceROS::InterfaceROS(int argc, char* argv[], QWidget* parent)
 				 	this, 		SLOT(newDataFromNodeROS(const int&, const QVector<double>&, const QVector<double>&))
 					);
 
+
+	qRegisterMetaType< QVector<double> >("QVector<double>");
+
 	endThreadRos = false;
 }
 
@@ -40,10 +43,8 @@ void InterfaceROS::run()
 	ROS_INFO("Starting Thread Interface ROS-GUI");	
 	ROS_INFO("[Interface ROS-GUI node] Initialization of node : Interface_ROS-GUI_node");
 	ros::init(argc_, argv_, "Interface_ROS_GUI_node");
-		
-	n = new ros::NodeHandle;
-
-	qRegisterMetaType< QVector<double> >("QVector<double>");
+  
+	n = new ros::NodeHandle;	
 
 	ROS_INFO("Subscribing to rf_riddle_intensity_map topic.");	
 	chatter_pub_gauss = n->subscribe("rf_riddle_intensity_map", 100, &nodeROSGUI::callback_getRFData, nodeROS);
