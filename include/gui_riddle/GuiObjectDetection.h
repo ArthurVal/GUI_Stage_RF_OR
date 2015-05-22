@@ -40,7 +40,7 @@ class GuiObjectDetection: public QWidget
 		int setTextRButtons(unsigned int num_rbutton, char* text);
 
 			//Setup of the GUI
-		void setupGUI_1(char* path_rviz_config_file = "~/.rviz/default.rviz");
+		void setupGUI_1(char* path_rviz_config_file = (char*)".rviz/default.rviz");
 		void startInterfaceROSThread();
 		void stopInterfaceROSThread();
 

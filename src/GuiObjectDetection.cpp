@@ -31,9 +31,9 @@ GuiObjectDetection::GuiObjectDetection(int argc, char* argv[], unsigned int n_la
 
 		//Create Plotting panel
 	rfPlotIntensity = new QwtPlot(QwtText("Intensity map from RF sensor"));
-	rfPlotIntensity->setAxisTitle(QwtPlot::xBottom, "Angle en Degree");
+	rfPlotIntensity->setAxisTitle(QwtPlot::xBottom, "<FONT color=#0000ff  face=Arial size=4><B>  Angle (Degree)  </FONT>");
 	rfPlotIntensity->setAxisScale(QwtPlot::xBottom, 180, -180);
-	rfPlotIntensity->setAxisTitle(QwtPlot::yLeft, "<FONT color=#0000ff  face=Arial size=4><B>  Detected Intensity  </FONT>");
+	rfPlotIntensity->setAxisTitle(QwtPlot::yLeft, "<FONT color=#0000ff  face=Arial size=4><B>Intensity</FONT>");
 	rfPlotIntensity->setAxisScale(QwtPlot::yLeft, 0, 1);
   rfPlotIntensity->setAutoReplot(true);
 
@@ -130,10 +130,16 @@ void GuiObjectDetection::setupGUI_1(char* path_rviz_config_file){
 	mainGridBox->addLayout(vBoxParam,0,1,2,1);
 	mainGridBox->addWidget(rfPlotIntensity,1,0,1,1);
 
-	mainGridBox->setColumnStretch(0,5);
+	mainGridBox->setColumnMinimumWidth(1,2);
+	mainGridBox->setColumnMinimumWidth(0,2);
+	mainGridBox->setColumnStretch(0,10);
 	mainGridBox->setColumnStretch(1,1);
-	mainGridBox->setRowStretch(0,5);
+/*
+	mainGridBox->setRowMinimumHeight(1,2);
+	mainGridBox->setRowMinimumHeight(0,2);
+	mainGridBox->setRowStretch(0,3);
 	mainGridBox->setRowStretch(1,1);
+*/
 
 	this->setLayout(mainGridBox);
 
