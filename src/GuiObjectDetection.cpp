@@ -134,12 +134,12 @@ void GuiObjectDetection::setupGUI_1(char* path_rviz_config_file){
 	mainGridBox->setColumnMinimumWidth(0,2);
 	mainGridBox->setColumnStretch(0,10);
 	mainGridBox->setColumnStretch(1,1);
-/*
+
 	mainGridBox->setRowMinimumHeight(1,2);
 	mainGridBox->setRowMinimumHeight(0,2);
-	mainGridBox->setRowStretch(0,3);
+	mainGridBox->setRowStretch(0,5);
 	mainGridBox->setRowStretch(1,1);
-*/
+
 
 	this->setLayout(mainGridBox);
 
