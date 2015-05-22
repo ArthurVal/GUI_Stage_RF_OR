@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
 	GuiObjectDetection IHM(argc, argv);
 
 	std::cout << "Setup 1 : ..." << std::endl;
-	IHM.setupGUI_1((char*)"/home/arthur/.rviz/Stage_RF_OR.rviz");
+	IHM.setupGUI_1((char*)"/home/avalient/.rviz/Stage_RF_OR.rviz");
 	if(IHM.getGUISetup() > 0){
 		std::cout << "Setup 1 : DONE" << std::endl;
 	}else{		
