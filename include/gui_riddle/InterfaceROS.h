@@ -33,11 +33,19 @@ class InterfaceROS: public QThread
 		void run();
 
 	signals:
-		void transfertInputDataToGUI(int index, const QVector<double> &x, const QVector<double> &y);
+		void transfertInputDataToGUI(int index, 
+																const QVector<double> &x_phi, 
+																const QVector<double> &y_phi, 
+																const QVector<double> &x_theta, 
+																const QVector<double> &y_theta);
 
 	public slots:
 		void disableThread();
-		void newDataFromNodeROS(int index, const QVector<double> &x, const QVector<double> &y);
+		void newDataFromNodeROS(int index, 
+																const QVector<double> &x_phi, 
+																const QVector<double> &y_phi, 
+																const QVector<double> &x_theta, 
+																const QVector<double> &y_theta);
 
 	private:
 			//Attributs

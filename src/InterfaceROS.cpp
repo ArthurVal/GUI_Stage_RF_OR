@@ -12,12 +12,9 @@ InterfaceROS::InterfaceROS(int argc, char* argv[], QWidget* parent)
 
 	nodeROS = new nodeROSGUI;
 	nodeROS->moveToThread(this);
-	connect(nodeROS, 	SIGNAL(newInputDataFromNodeROS(const int&, const QVector<double>&, const QVector<double>&)),
-				 	this, 		SLOT(newDataFromNodeROS(const int&, const QVector<double>&, const QVector<double>&))
+	connect(nodeROS, 	SIGNAL(newInputDataFromNodeROS(const int&, const QVector<double>&, const QVector<double>&, const QVector<double>&, const QVector<double>&)),
+				 	this, 		SLOT(newDataFromNodeROS(const int&, const QVector<double>&, const QVector<double>&, const QVector<double>&, const QVector<double>&))
 					);
-
-
-	qRegisterMetaType< QVector<double> >("QVector<double>");
 
 	endThreadRos = false;
 }
@@ -30,9 +27,9 @@ void InterfaceROS::disableThread()
 {
 	endThreadRos = true;
 }
-void InterfaceROS::newDataFromNodeROS(int index, const QVector<double> &x, const QVector<double> &y)
+void InterfaceROS::newDataFromNodeROS(int index, const QVector<double> &x_phi, const QVector<double> &y_phi, const QVector<double> &x_theta, const QVector<double> &y_theta)
 {
-	emit transfertInputDataToGUI(index,x,y);
+	emit transfertInputDataToGUI(index,x_phi,y_phi,x_theta,y_theta);
 }
 /*==================================================================*/
 /*--------------------		InterfaceROS::run()		--------------------*/
@@ -46,13 +43,15 @@ void InterfaceROS::run()
   
 	n = new ros::NodeHandle;	
 
+	qRegisterMetaType< QVector<double> >("QVector<double>");
+
 	ROS_INFO("Subscribing to rf_riddle_intensity_map topic.");	
 	chatter_pub_gauss = n->subscribe("rf_riddle_intensity_map", 100, &nodeROSGUI::callback_getRFData, nodeROS);
 
 	if(!chatter_pub_gauss){	
 		ROS_INFO("Subscribing to rf_riddle_intensity_map FAILED.");
 	}
-
+	
 	//ros::spin();
 	this->exec();
 

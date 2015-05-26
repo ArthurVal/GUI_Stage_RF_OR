@@ -45,14 +45,20 @@ class GuiObjectDetection: public QWidget
 		void stopInterfaceROSThread();
 
 	public slots: 
-		void updateRFData(int index, const QVector<double> &x, const QVector<double> &y);
+		void updateRFData(int index,  
+											const QVector<double> &x_phi, 
+											const QVector<double> &y_phi, 
+											const QVector<double> &x_theta, 
+											const QVector<double> &y_theta);
 
 	private:
 			//Attributs
 		rviz::VisualizationManager *rvizManager;
 		rviz::VisualizationFrame *rvizPanel;		
 		QwtPlot *rfPlotIntensity;
-		QwtPlotCurve *curveIntensity;
+		QwtPlotCurve *curveIntensity;		
+		QwtPlot *rfPlotIntensityTheta;
+		QwtPlotCurve *curveIntensityTheta;
 		QRadioButton *rButtons[N_RBUTTON_MAX];
 		QLabel *labels[N_LABEL_MAX];
 		QVBoxLayout *vBoxParam;
