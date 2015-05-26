@@ -4,6 +4,7 @@
 #include <QtGui>
 #include <QObject>
 #include "rf_riddle/RF.h"
+#include "rf_riddle/RFBase.h"
 	
 class nodeROSGUI: public QObject
 {
@@ -20,7 +21,11 @@ class nodeROSGUI: public QObject
 		void callback_getRFData(const rf_riddle::RF &rf_data);
 
 	signals:
-		void newInputDataFromNodeROS(int index, const QVector<double> &x, const QVector<double> &y);
+		void newInputDataFromNodeROS(int index, 
+																const QVector<double> &x_phi, 
+																const QVector<double> &y_phi, 
+																const QVector<double> &x_theta, 
+																const QVector<double> &y_theta);
 
 	protected:
 
