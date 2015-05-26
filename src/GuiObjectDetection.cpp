@@ -133,7 +133,7 @@ void GuiObjectDetection::setupGUI_1(char* path_rviz_config_file){
 
 	mainGridBox->setColumnStretch(0,10);
 	mainGridBox->setColumnStretch(1,1);
-	mainGridBox->setRowStretch(0,5);
+	mainGridBox->setRowStretch(0,4);
 	mainGridBox->setRowStretch(1,1);
 
 		//Setup Main Layout
