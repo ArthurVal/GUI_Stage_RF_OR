@@ -22,16 +22,24 @@ GuiObjectDetection::GuiObjectDetection(int argc, char* argv[], unsigned int n_la
 
 		//Setup the interface ROS/Qt
 	InterfaceROSGUI = new InterfaceROS(argc,argv);
-	connect(InterfaceROSGUI, 	SIGNAL(transfertInputDataToGUI(const int&, const QVector<double>&, const QVector<double>&)),
-				 	this, 						SLOT(updateRFData(const int&, const QVector<double>&, const QVector<double>&))
+	connect(InterfaceROSGUI, 	SIGNAL(transfertInputDataToGUI(	const int&, 	
+																														const QVector<double>&, 
+																														const QVector<double>&, 
+																														const QVector<double>&, 
+																														const QVector<double>&)),
+				 	this, 						SLOT(updateRFData(const int&, 
+																							const QVector<double>&, 
+																							const QVector<double>&, 
+																							const QVector<double>&, 
+																							const QVector<double>&))
 					);	
 
 		//Create Rviz panel
 	rvizPanel = new rviz::VisualizationFrame();
 
-		//Create Plotting panel
-	rfPlotIntensity = new QwtPlot(QwtText("Intensity map from RF sensor"));
-	rfPlotIntensity->setAxisTitle(QwtPlot::xBottom, "<FONT color=#0000ff  face=Arial size=2><B>  Horizontal Angle (Degree)  </FONT>");
+		//Create Plotting panel for Phi angle (bottom of the screen)
+	rfPlotIntensity = new QwtPlot(QwtText("Intensity map from RF sensor (Phi)"));
+	rfPlotIntensity->setAxisTitle(QwtPlot::xBottom, "<FONT color=#0000ff  face=Arial size=2><B>  Horizontal Angle Phi (Degree)  </FONT>");
 	rfPlotIntensity->setAxisScale(QwtPlot::xBottom, 180, -180);
 	rfPlotIntensity->setAxisTitle(QwtPlot::yLeft, "<FONT color=#0000ff  face=Arial size=2><B>Intensity</FONT>");
 	rfPlotIntensity->setAxisScale(QwtPlot::yLeft, 0, 1);
@@ -41,7 +49,24 @@ GuiObjectDetection::GuiObjectDetection(int argc, char* argv[], unsigned int n_la
 	curveIntensity = new QwtPlotCurve("Intensity Curve");
 	curveIntensity->setPen(QPen(Qt::red));
 	curveIntensity->attach(rfPlotIntensity);
-	
+
+		//Create Plotting panel for theta angle (right of the screen)
+	rfPlotIntensityTheta = new QwtPlot(QwtText("Intensity map from RF sensor (Theta)"));
+	rfPlotIntensityTheta->enableAxis(QwtPlot::yRight,true);
+	rfPlotIntensityTheta->enableAxis(QwtPlot::yLeft,false);
+	rfPlotIntensityTheta->setAxisTitle(QwtPlot::yRight, "<FONT color=#0000ff  face=Arial size=2><B>  Vertival Angle Theta (Degree)  </FONT>");
+	rfPlotIntensityTheta->setAxisScale(QwtPlot::yRight, 180, 0);
+	rfPlotIntensityTheta->setAxisScale(QwtPlot::yLeft, 180, 0);
+	rfPlotIntensityTheta->setAxisTitle(QwtPlot::xBottom, "<FONT color=#0000ff  face=Arial size=2><B>Intensity</FONT>");
+	rfPlotIntensityTheta->setAxisScale(QwtPlot::xBottom, 1, 0);
+	rfPlotIntensityTheta->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
+  //rfPlotIntensity->setAutoReplot(true);
+
+	curveIntensityTheta = new QwtPlotCurve("Intensity Curve");
+	curveIntensityTheta->setPen(QPen(Qt::red));
+	curveIntensityTheta->attach(rfPlotIntensityTheta);
+
+
 
 	if(n_rbutton > N_RBUTTON_MAX)
 		n_rbutton = N_RBUTTON_MAX;
@@ -131,15 +156,16 @@ void GuiObjectDetection::setupGUI_1(char* path_rviz_config_file){
 	mainGridBox->setRowMinimumHeight(1,2);
 	mainGridBox->setRowMinimumHeight(0,2);
 
-	mainGridBox->setColumnStretch(0,10);
+	mainGridBox->setColumnStretch(0,4);
 	mainGridBox->setColumnStretch(1,1);
-	mainGridBox->setRowStretch(0,5);
+	mainGridBox->setRowStretch(0,4);
 	mainGridBox->setRowStretch(1,1);
 
 		//Setup Main Layout
 	mainGridBox->addWidget(rvizPanel,0,0,1,1);
-	mainGridBox->addLayout(vBoxParam,0,1,2,1);
+	mainGridBox->addWidget(rfPlotIntensityTheta,0,1,1,1);
 	mainGridBox->addWidget(rfPlotIntensity,1,0,1,1);
+	mainGridBox->addLayout(vBoxParam,1,1,1,1);
 
 	//rfPlotIntensity->updateCanvasMargins();
 
@@ -174,9 +200,12 @@ void GuiObjectDetection::stopInterfaceROSThread()
 /*-------------------		SLOT : GuiObjectDetection::updateRFData()		---------------------*/
 /*=======================================================================================*/
 
-void GuiObjectDetection::updateRFData(int index, const QVector<double> &x, const QVector<double> &y)
+void GuiObjectDetection::updateRFData(int index, const QVector<double> &x_phi, const QVector<double> &y_phi, const QVector<double> &x_theta, const QVector<double> &y_theta)
 {
-	curveIntensity->setSamples(x,y);
+	curveIntensity->setSamples(x_phi,y_phi);
 	rfPlotIntensity->replot();
+
+	curveIntensityTheta->setSamples(y_theta,x_theta);
+	rfPlotIntensityTheta->replot();
 }
 

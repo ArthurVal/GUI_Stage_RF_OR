@@ -28,7 +28,16 @@ class GuiObjectDetection: public QWidget
 			//Constructors
 		GuiObjectDetection(int argc, char* argv[], unsigned int n_label = N_LABEL_MAX,unsigned int n_rbutton = N_RBUTTON_MAX, QWidget* parent = 0);
 			//Desctructors
-		~GuiObjectDetection() { stopInterfaceROSThread(); };
+		inline ~GuiObjectDetection() { 	stopInterfaceROSThread(); 
+																		delete rvizPanel; 
+																		delete rfPlotIntensity; 
+																		delete curveIntensity; 
+																		delete rfPlotIntensityTheta; 
+																		delete curveIntensityTheta; 
+																		delete rButtons; 
+																		delete labels; 
+																		delete vBoxParam; 
+																		delete mainGridBox;};
 
 			//Get Attributs
 		unsigned int getSizeLabels(){ return sizeLabels; }
@@ -40,18 +49,24 @@ class GuiObjectDetection: public QWidget
 		int setTextRButtons(unsigned int num_rbutton, char* text);
 
 			//Setup of the GUI
-		void setupGUI_1(char* path_rviz_config_file = "~/.rviz/default.rviz");
+		void setupGUI_1(char* path_rviz_config_file = (char*)".rviz/default.rviz");
 		void startInterfaceROSThread();
 		void stopInterfaceROSThread();
 
 	public slots: 
-		void updateRFData(int index, const QVector<float> &x, const QVector<float> &y);
+		void updateRFData(int index,  
+											const QVector<double> &x_phi, 
+											const QVector<double> &y_phi, 
+											const QVector<double> &x_theta, 
+											const QVector<double> &y_theta);
 
 	private:
 			//Attributs
 		rviz::VisualizationFrame *rvizPanel;		
 		QwtPlot *rfPlotIntensity;
-		QwtPlotCurve *curveIntensity;
+		QwtPlotCurve *curveIntensity;		
+		QwtPlot *rfPlotIntensityTheta;
+		QwtPlotCurve *curveIntensityTheta;
 		QRadioButton *rButtons[N_RBUTTON_MAX];
 		QLabel *labels[N_LABEL_MAX];
 		QVBoxLayout *vBoxParam;

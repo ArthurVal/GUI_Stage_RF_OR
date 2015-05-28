@@ -25,10 +25,10 @@ void nodeROSGUI::callback_getRFData(const rf_riddle::RF &rf_data)
 	QVector<double> x_phi,y_phi;
 	QVector<double> x_theta,y_theta;
 
-	for (char k = 0 ; k < 2 ; ++k){ 	//For Phi & Theta
+	for (int k = 0 ; k < 2 ; ++k){ 	//For Phi & Theta
 
 			//If angleID == true -> Phi else (angleID == false) -> Theta
-		if(rf_data.rfData[k].angleID == true){
+		if(rf_data.rfData[k].angleID){
 				//Phi
 			for(int i = 0; i < rf_data.rfData[k].sizeData ; ++i){
 				x_phi.push_back(rf_data.rfData[k].angle[i]);

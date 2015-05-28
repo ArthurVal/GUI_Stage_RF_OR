@@ -22,6 +22,7 @@ GuiObjectDetection::GuiObjectDetection(int argc, char* argv[], unsigned int n_la
 
 		//Setup the interface ROS/Qt
 	InterfaceROSGUI = new InterfaceROS(argc,argv);
+
 	connect(InterfaceROSGUI, 	SIGNAL(transfertInputDataToGUI(	const int&, 	
 																														const QVector<double>&, 
 																														const QVector<double>&, 

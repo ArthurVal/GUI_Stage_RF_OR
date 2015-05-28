@@ -28,7 +28,7 @@ class GuiObjectDetection: public QWidget
 			//Constructors
 		GuiObjectDetection(int argc, char* argv[], unsigned int n_label = N_LABEL_MAX,unsigned int n_rbutton = N_RBUTTON_MAX, QWidget* parent = 0);
 			//Desctructors
-		~GuiObjectDetection() { stopInterfaceROSThread(); };
+		inline ~GuiObjectDetection() { 	stopInterfaceROSThread();};
 
 			//Get Attributs
 		unsigned int getSizeLabels(){ return sizeLabels; }
@@ -53,7 +53,6 @@ class GuiObjectDetection: public QWidget
 
 	private:
 			//Attributs
-		rviz::VisualizationManager *rvizManager;
 		rviz::VisualizationFrame *rvizPanel;		
 		QwtPlot *rfPlotIntensity;
 		QwtPlotCurve *curveIntensity;		

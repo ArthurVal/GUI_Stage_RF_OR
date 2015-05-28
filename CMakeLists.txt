@@ -9,6 +9,7 @@ find_package(catkin REQUIRED
   object_recognition_core
   roscpp
   rviz
+	geometry_msgs
 	message_generation
 )
 
