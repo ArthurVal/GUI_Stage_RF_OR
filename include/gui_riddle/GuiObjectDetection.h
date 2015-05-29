@@ -53,20 +53,38 @@ class GuiObjectDetection: public QWidget
 
 	private:
 			//Attributs
-		rviz::VisualizationFrame *rvizPanel;		
+		rviz::VisualizationFrame *rvizPanel;
+		
 		QwtPlot *rfPlotIntensity;
-		QwtPlotCurve *curveIntensity;		
+		QwtPlotCurve *curveIntensity;
+		
 		QwtPlot *rfPlotIntensityTheta;
 		QwtPlotCurve *curveIntensityTheta;
+
 		QRadioButton *rButtons[N_RBUTTON_MAX];
 		QLabel *labels[N_LABEL_MAX];
-		QVBoxLayout *vBoxParam;
+
+		QGridLayout *gridBoxParamRF;
+		QVBoxLayout *vBoxParamVision;
+		QVBoxLayout *vBoxParamFusion;
+		
+		QTabWidget *tabParam;
+		QWidget *tabPageRF;
+		QWidget *tabPageVision;
+		QWidget *tabPageFusion;
+	
 		QGridLayout *mainGridBox;
+
 		InterfaceROS *InterfaceROSGUI;
+
 		unsigned int sizeRButtons;			
 		unsigned int sizeLabels;
-		unsigned int GUI_OK;	
-
+		unsigned int GUI_OK;
+	
+		double minPhi;	
+		double maxPhi;	
+		double minTheta;	
+		double maxTheta;
 
 };
 

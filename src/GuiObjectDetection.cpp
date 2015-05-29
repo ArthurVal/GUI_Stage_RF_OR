@@ -95,7 +95,14 @@ GuiObjectDetection::GuiObjectDetection(int argc, char* argv[], unsigned int n_la
 		labels[i] = new QLabel(num.c_str());
 	}
 	
-	vBoxParam = new QVBoxLayout();
+	gridBoxParamRF = new QGridLayout();
+	vBoxParamVision = new QVBoxLayout();
+	vBoxParamFusion = new QVBoxLayout();
+
+	tabParam = new QTabWidget();
+	tabPageRF = new QWidget();
+	tabPageVision = new QWidget();
+	tabPageFusion = new QWidget();
 	
 		
 	GUI_OK = 0;
@@ -144,13 +151,134 @@ void GuiObjectDetection::setupGUI_1(char* path_rviz_config_file){
 		rButtons[i]->setText(text.c_str());
 	}
 		//Set Labels texts
-	labels[0]->setText("===========================\n=====  WORK IN PROGRESS =====\n===========================");
-	labels[0]->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
+	labels[0]->setText("RF Parameters");
 	labels[0]->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-	labels[0]->setStyleSheet("QLabel { background-color : white; color : black; }");
+
+	labels[1]->setText("=== TBD ===");
+	labels[1]->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
+	labels[1]->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+	labels[1]->setStyleSheet("QLabel { background-color : white; color : black; }");
+
+	labels[2]->setText("=== TBD ===");
+	labels[2]->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
+	labels[2]->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+	labels[2]->setStyleSheet("QLabel { background-color : white; color : black; }");
+
 
 		//Setup Vlayout
-	vBoxParam->addWidget(labels[0]);
+
+			// ---- RF Param -----
+	gridBoxParamRF->addWidget(labels[0],0,0,1,5);
+
+	QLabel *label_text[6];
+	label_text[0] = new QLabel();
+	label_text[0]->setText("min");
+	label_text[0]->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+
+	label_text[1] = new QLabel();
+	label_text[1]->setText("max");
+	label_text[1]->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+
+	label_text[2] = new QLabel();
+	label_text[2]->setText("Duree (s)");
+	label_text[2]->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+
+	label_text[3] = new QLabel();
+	label_text[3]->setText("N_Points");
+	label_text[3]->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+
+	label_text[4] = new QLabel();	
+	label_text[4]->setText(QChar(0x03C6)); //phi
+	label_text[4]->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+
+	label_text[5] = new QLabel();
+	label_text[5]->setText(QChar(0x03B8)); //Theta
+	label_text[5]->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+
+	gridBoxParamRF->addWidget(label_text[0],1,1,1,1);
+	gridBoxParamRF->addWidget(label_text[1],1,2,1,1);
+	gridBoxParamRF->addWidget(label_text[2],1,3,1,1);
+	gridBoxParamRF->addWidget(label_text[3],1,4,1,1);
+
+	gridBoxParamRF->addWidget(label_text[4],2,0,1,1);
+	gridBoxParamRF->addWidget(label_text[5],3,0,1,1);
+	
+	QLineEdit *line[6];
+	QDoubleValidator *validator[5];
+	QIntValidator *validatorPoints;
+ 
+		//min Phi
+	line[0] = new QLineEdit("-180");
+	line[0]->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+	validator[0] = new QDoubleValidator(-180, 180, 2); //from -180 to 180 degrees with 2 decimals
+	line[0]->setValidator(validator[0]);
+
+	gridBoxParamRF->addWidget(line[0],2,1,1,1);
+ 
+		//max Phi
+	line[1] = new QLineEdit("180");
+	line[1]->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+	validator[1] = new QDoubleValidator(-180, 180, 2); //from -180 to 180 degrees with 2 decimals
+	line[1]->setValidator(validator[1]);
+
+	gridBoxParamRF->addWidget(line[1],2,2,1,1);
+ 
+		//min Theta
+	line[2] = new QLineEdit("0");
+	line[2]->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+	validator[2] = new QDoubleValidator(0, 180, 2); //from 0 to 180 degrees with 2 decimals
+	line[2]->setValidator(validator[2]);
+
+	gridBoxParamRF->addWidget(line[2],3,1,1,1);
+ 
+		//max Theta
+	line[3] = new QLineEdit("180");
+	line[3]->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+	validator[3] = new QDoubleValidator(0, 180, 2); //from 0 to 180 degrees with 2 decimals
+	line[3]->setValidator(validator[3]);
+
+	gridBoxParamRF->addWidget(line[3],3,2,1,1);
+ 
+		//Duree
+	line[4] = new QLineEdit("10");
+	line[4]->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+	validator[4] = new QDoubleValidator(0, 60, 2); // from 0 -> 60s 
+	line[4]->setValidator(validator[4]);
+
+	gridBoxParamRF->addWidget(line[4],2,3,1,1);
+ 
+		//N_point
+	line[5] = new QLineEdit("360");
+	line[5]->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+	validatorPoints = new QIntValidator(0, 720); 
+	line[5]->setValidator(validatorPoints);
+
+	gridBoxParamRF->addWidget(line[5],2,4,1,1);
+
+	QPushButton *StartButton = new QPushButton("Start RF");
+	gridBoxParamRF->addWidget(StartButton,3,3,1,2);
+
+
+	gridBoxParamRF->setColumnStretch(0,1);
+	for(int i = 1 ; i < 5 ; ++i )		
+		gridBoxParamRF->setColumnStretch(i,3);
+
+	for(int i = 0 ; i < 4 ; ++i )		
+		gridBoxParamRF->setRowStretch(i,1);
+
+			// ---- ORK Param ---- 	
+	vBoxParamVision->addWidget(labels[1]);	
+			// ---- Fusion Param ---- 
+	vBoxParamFusion->addWidget(labels[2]);	
+
+		//Setup Tab Widget
+	tabPageRF->setLayout(gridBoxParamRF);
+	tabPageVision->setLayout(vBoxParamVision);
+	tabPageFusion->setLayout(vBoxParamFusion);
+
+	tabParam->addTab(tabPageRF, "RF");
+	tabParam->addTab(tabPageVision, "Vision");
+	tabParam->addTab(tabPageFusion, "Fusion");
 
 	mainGridBox->setColumnMinimumWidth(1,2);
 	mainGridBox->setColumnMinimumWidth(0,2);
@@ -166,7 +294,7 @@ void GuiObjectDetection::setupGUI_1(char* path_rviz_config_file){
 	mainGridBox->addWidget(rvizPanel,0,0,1,1);
 	mainGridBox->addWidget(rfPlotIntensityTheta,0,1,1,1);
 	mainGridBox->addWidget(rfPlotIntensity,1,0,1,1);
-	mainGridBox->addLayout(vBoxParam,1,1,1,1);
+	mainGridBox->addWidget(tabParam,1,1,1,1);
 
 	//rfPlotIntensity->updateCanvasMargins();
 
@@ -174,6 +302,10 @@ void GuiObjectDetection::setupGUI_1(char* path_rviz_config_file){
 
 	GUI_OK = 1;
 }
+
+/*---------------------------------------------------------------------------------------*/
+/*--------------------------------       SLOT      --------------------------------------*/
+/*---------------------------------------------------------------------------------------*/
 
 /*=======================================================================================*/
 /*-----------		SLOT : GuiObjectDetection::startInterfaceROSThread()		-----------------*/
