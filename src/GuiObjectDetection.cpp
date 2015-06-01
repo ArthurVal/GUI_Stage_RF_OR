@@ -35,6 +35,20 @@ GuiObjectDetection::GuiObjectDetection(int argc, char* argv[], unsigned int n_la
 																							const QVector<double>&))
 					);	
 
+	connect(this, 	SIGNAL(startRFAcquisition(const double&,
+																						const double&,
+																						const double&,
+																						const double&,
+																						const double&,
+																						const unsigned int&)),
+				 	InterfaceROSGUI,	SLOT(transfertStartRF(	const double&,
+																										const double&,
+																										const double&,
+																										const double&,
+																										const double&,
+																										const unsigned int&))
+					);
+	
 		//Create Rviz panel
 	rvizPanel = new rviz::VisualizationFrame();
 
@@ -103,7 +117,14 @@ GuiObjectDetection::GuiObjectDetection(int argc, char* argv[], unsigned int n_la
 	tabPageRF = new QWidget();
 	tabPageVision = new QWidget();
 	tabPageFusion = new QWidget();
-	
+
+	minTheta = 0;	
+	maxTheta = 180;
+	minPhi = -180;
+	maxPhi = 180;
+
+	acquisitionTime = 1;
+	nPoint = 360;
 		
 	GUI_OK = 0;
 }
@@ -203,7 +224,6 @@ void GuiObjectDetection::setupGUI_1(char* path_rviz_config_file){
 	gridBoxParamRF->addWidget(label_text[4],2,0,1,1);
 	gridBoxParamRF->addWidget(label_text[5],3,0,1,1);
 	
-	QLineEdit *line[6];
 	QDoubleValidator *validator[5];
 	QIntValidator *validatorPoints;
  
@@ -212,6 +232,7 @@ void GuiObjectDetection::setupGUI_1(char* path_rviz_config_file){
 	line[0]->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 	validator[0] = new QDoubleValidator(-180, 180, 2); //from -180 to 180 degrees with 2 decimals
 	line[0]->setValidator(validator[0]);
+	connect(line[0], SIGNAL(editingFinished()), this, SLOT(updateMinPhi()));
 
 	gridBoxParamRF->addWidget(line[0],2,1,1,1);
  
@@ -220,6 +241,7 @@ void GuiObjectDetection::setupGUI_1(char* path_rviz_config_file){
 	line[1]->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 	validator[1] = new QDoubleValidator(-180, 180, 2); //from -180 to 180 degrees with 2 decimals
 	line[1]->setValidator(validator[1]);
+	connect(line[1], SIGNAL(editingFinished()), this, SLOT(updateMaxPhi()));
 
 	gridBoxParamRF->addWidget(line[1],2,2,1,1);
  
@@ -228,6 +250,7 @@ void GuiObjectDetection::setupGUI_1(char* path_rviz_config_file){
 	line[2]->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 	validator[2] = new QDoubleValidator(0, 180, 2); //from 0 to 180 degrees with 2 decimals
 	line[2]->setValidator(validator[2]);
+	connect(line[2], SIGNAL(editingFinished()), this, SLOT(updateMinTheta()));
 
 	gridBoxParamRF->addWidget(line[2],3,1,1,1);
  
@@ -236,14 +259,16 @@ void GuiObjectDetection::setupGUI_1(char* path_rviz_config_file){
 	line[3]->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 	validator[3] = new QDoubleValidator(0, 180, 2); //from 0 to 180 degrees with 2 decimals
 	line[3]->setValidator(validator[3]);
+	connect(line[3], SIGNAL(editingFinished()), this, SLOT(updateMaxTheta()));
 
 	gridBoxParamRF->addWidget(line[3],3,2,1,1);
  
 		//Duree
-	line[4] = new QLineEdit("10");
+	line[4] = new QLineEdit("1");
 	line[4]->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 	validator[4] = new QDoubleValidator(0, 60, 2); // from 0 -> 60s 
 	line[4]->setValidator(validator[4]);
+	connect(line[4], SIGNAL(editingFinished()), this, SLOT(updateAcTime()));
 
 	gridBoxParamRF->addWidget(line[4],2,3,1,1);
  
@@ -252,11 +277,14 @@ void GuiObjectDetection::setupGUI_1(char* path_rviz_config_file){
 	line[5]->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 	validatorPoints = new QIntValidator(0, 720); 
 	line[5]->setValidator(validatorPoints);
+	connect(line[5], SIGNAL(editingFinished()), this, SLOT(updateNPoints()));
 
 	gridBoxParamRF->addWidget(line[5],2,4,1,1);
 
-	QPushButton *StartButton = new QPushButton("Start RF");
-	gridBoxParamRF->addWidget(StartButton,3,3,1,2);
+	StartRFButton = new QPushButton("Start RF");
+	connect(StartRFButton, SIGNAL(clicked()), this, SLOT(startAcquisition()) );
+
+	gridBoxParamRF->addWidget(StartRFButton,3,3,1,2);
 
 
 	gridBoxParamRF->setColumnStretch(0,1);
@@ -342,3 +370,162 @@ void GuiObjectDetection::updateRFData(int index, const QVector<double> &x_phi, c
 	rfPlotIntensityTheta->replot();
 }
 
+/*=============================================================================*/
+/*-----------		SLOT : GuiObjectDetection::updateMinTheta()		-----------------*/
+/*=============================================================================*/
+
+void GuiObjectDetection::updateMinTheta()
+{
+	QString minT = line[2]->text();
+ 	double Theta = minT.toDouble();
+	if(Theta < maxTheta){
+		minTheta = Theta;
+	}else{
+		if(Theta > maxTheta){
+			maxTheta = Theta;
+				//Put theta in max theta for auto-update		
+			line[3]->setText(minT);
+				//rewrite min theta in lineEdit
+			QString str;
+			str.setNum(minTheta);
+			line[2]->setText(str);
+		}else{ //Theta = maxTheta 
+			//rewrite min theta in lineEdit (do nothing)
+			QString str;
+			str.setNum(minTheta);
+			line[2]->setText(str);
+		}
+	}
+
+	//std::cout << "[GUI RIDDLE] [DEBUG] Slot GUI -> Theta : "<< Theta << "  ->minTheta : " << minTheta << std::endl;	
+}
+
+/*=============================================================================*/
+/*-----------		SLOT : GuiObjectDetection::updateMaxTheta()		-----------------*/
+/*=============================================================================*/
+
+void GuiObjectDetection::updateMaxTheta()
+{
+	QString maxT = line[3]->text();
+ 	double Theta = maxT.toDouble();
+	if(Theta > minTheta){
+		maxTheta = Theta;
+	}else{
+		if(Theta < minTheta){
+			minTheta = Theta;
+				//Put theta in min theta for auto-update		
+			line[2]->setText(maxT);
+				//rewrite max theta in lineEdit
+			QString str;
+			str.setNum(maxTheta);
+			line[3]->setText(str);
+		}else{ //Theta = minTheta 
+			//rewrite max theta in lineEdit (do nothing)
+			QString str;
+			str.setNum(maxTheta);
+			line[3]->setText(str);
+		}
+	}
+
+	//std::cout << "[GUI RIDDLE] [DEBUG] Slot GUI -> Theta : "<< Theta << "  ->maxTheta : " << maxTheta << std::endl;	
+}
+
+
+/*=============================================================================*/
+/*-----------		SLOT : GuiObjectDetection::updateMinPhi()		-----------------*/
+/*=============================================================================*/
+
+void GuiObjectDetection::updateMinPhi()
+{
+	QString minP = line[0]->text();
+ 	double Phi = minP.toDouble();
+	if(Phi < maxPhi){
+		minPhi = Phi;
+	}else{
+		if(Phi > maxPhi){
+			maxPhi = Phi;
+				//Put theta in max theta for auto-update		
+			line[1]->setText(minP);
+				//rewrite min theta in lineEdit
+			QString str;
+			str.setNum(minPhi);
+			line[0]->setText(str);
+		}else{ //Theta = maxTheta 
+			//rewrite min theta in lineEdit (do nothing)
+			QString str;
+			str.setNum(minPhi);
+			line[0]->setText(str);
+		}
+	}
+
+	//std::cout << "[GUI RIDDLE] [DEBUG] Slot GUI -> Phi : "<< Phi << "  ->minPhi : " << minPhi << std::endl;	
+}
+
+/*=============================================================================*/
+/*-----------		SLOT : GuiObjectDetection::updateMaxPhi()		-----------------*/
+/*=============================================================================*/
+
+void GuiObjectDetection::updateMaxPhi()
+{
+	QString maxP = line[1]->text();
+ 	double Phi = maxP.toDouble();
+	if(Phi > minPhi){
+		maxPhi = Phi;
+	}else{
+		if(Phi < minPhi){
+			minPhi = Phi;
+				//Put theta in min theta for auto-update		
+			line[0]->setText(maxP);
+				//rewrite max theta in lineEdit
+			QString str;
+			str.setNum(maxPhi);
+			line[1]->setText(str);
+		}else{ //Theta = minTheta 
+			//rewrite max theta in lineEdit (do nothing)
+			QString str;
+			str.setNum(maxPhi);
+			line[1]->setText(str);
+		}
+	}
+
+	//std::cout << "[GUI RIDDLE] [DEBUG] Slot GUI -> Phi : "<< Phi << "  ->maxPhi : " << maxPhi << std::endl;	
+}
+
+/*=============================================================================*/
+/*-----------		SLOT : GuiObjectDetection::updateAcTime()		-----------------*/
+/*=============================================================================*/
+
+void GuiObjectDetection::updateAcTime()
+{
+	QString ATime = line[4]->text();
+ 	acquisitionTime = ATime.toDouble();
+	//std::cout << "[GUI RIDDLE] [DEBUG] Slot GUI -> acquisitionTime : "<< acquisitionTime << std::endl;	
+}
+
+/*=============================================================================*/
+/*-----------		SLOT : GuiObjectDetection::updateNPoints()		-----------------*/
+/*=============================================================================*/
+
+void GuiObjectDetection::updateNPoints()
+{
+	QString NPts = line[5]->text();
+ 	nPoint = NPts.toInt();
+	//std::cout << "[GUI RIDDLE] [DEBUG] Slot GUI -> nPoint : "<< nPoint << std::endl;	
+}
+
+/*=============================================================================*/
+/*-----------		SLOT : GuiObjectDetection::startAcquisition()		-----------------*/
+/*=============================================================================*/
+
+void GuiObjectDetection::startAcquisition()
+{
+	std::cout << "[GUI RIDDLE] [DEBUG] Bouton clicked" << std::endl;
+	std::cout << "[GUI RIDDLE] [DEBUG] Data transmitted" << std::endl;
+	std::cout << "[GUI RIDDLE] [DEBUG] minPhi = " << minPhi << std::endl;
+	std::cout << "[GUI RIDDLE] [DEBUG] maxPhi = " << maxPhi << std::endl;
+	std::cout << "[GUI RIDDLE] [DEBUG] minTheta = " << minTheta << std::endl;
+	std::cout << "[GUI RIDDLE] [DEBUG] maxTheta = " << maxTheta << std::endl;
+	std::cout << "[GUI RIDDLE] [DEBUG] acquisitionTime = " << acquisitionTime << std::endl;
+	std::cout << "[GUI RIDDLE] [DEBUG] nPoint = " << nPoint << std::endl;
+	emit startRFAcquisition(minPhi,maxPhi,minTheta,maxTheta,acquisitionTime,nPoint);
+}

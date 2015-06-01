@@ -3,6 +3,41 @@
 nodeROSGUI::nodeROSGUI(QWidget* parent)
 : QObject(parent)
 {
+	isRemote = false;
+}
+/*======================================================================*/
+/*--------------------		nodeROSGUI::init_ROS()		--------------------*/
+/*======================================================================*/
+
+void nodeROSGUI::init_ROS(int argc, char** argv){
+	ROS_INFO("Starting Thread Interface ROS-GUI");	
+	ROS_INFO("[Interface ROS-GUI node] Initialization of node : Interface_ROS-GUI_node");
+	ros::init(argc, argv, "Interface_ROS_GUI_node");
+  
+	n = new ros::NodeHandle;
+	
+	chatter_client_gauss = n->serviceClient<rf_riddle::getRFData>("rf_riddle_intensity_map");
+	if(chatter_client_gauss){
+		isRemote = true;
+		ROS_INFO("Connection to rf_riddle_intensity_map Service (getRFData).");
+	}
+
+	ROS_INFO("Subscribing to rf_riddle_intensity_map topic.");	
+	chatter_pub_gauss = n->subscribe("rf_riddle_intensity_map", 100, &nodeROSGUI::callback_getRFData, this);
+
+	if(!chatter_pub_gauss){	
+		ROS_INFO("Subscribing to rf_riddle_intensity_map FAILED.");
+	}
+	
+}
+
+/*======================================================================*/
+/*--------------------		nodeROSGUI::end_ROS()		--------------------*/
+/*======================================================================*/
+
+void nodeROSGUI::end_ROS(){
+	delete n;
+	ROS_INFO("[Interface ROS-GUI node] Shutdown of node : Interface_ROS-GUI_node");
 }
 
 /*==================================================================================*/
@@ -45,3 +80,54 @@ void nodeROSGUI::callback_getRFData(const rf_riddle::RF &rf_data)
 	}
 	emit newInputDataFromNodeROS(rf_data.index,x_phi,y_phi,x_theta,y_theta);
 }
+
+
+/*---------------------------------------------------------------------------------------*/
+/*--------------------------------       SLOT      --------------------------------------*/
+/*---------------------------------------------------------------------------------------*/
+
+/*=================================================================*/
+/*-----------		SLOT : nodeROSGUI::getDataRF()		-----------------*/
+/*=================================================================*/
+void nodeROSGUI::getDataRF(	const double &minPhi,
+														const double &maxPhi,
+														const double &minTheta,
+														const double &maxTheta,
+														const double &AcTime,
+														const unsigned int &Npts)
+{
+	
+	ROS_INFO("[Interface ROS-GUI node] Slot called");
+
+	if(!isRemote)
+		return ;
+
+	rf_riddle::getRFData getRFSrv;
+	
+	getRFSrv.request.rfSetupNeeded.thetaMin = minTheta;
+	getRFSrv.request.rfSetupNeeded.thetaMax = maxTheta;
+	getRFSrv.request.rfSetupNeeded.phiMin = minPhi;
+	getRFSrv.request.rfSetupNeeded.phiMax = maxPhi;
+	getRFSrv.request.rfSetupNeeded.acquisitionTime = AcTime;
+	getRFSrv.request.rfSetupNeeded.nPoints = Npts;
+
+	if(chatter_client_gauss.call(getRFSrv)){
+		ROS_INFO("[Interface ROS-GUI node] Service Call succeed:");
+		ROS_INFO("[Interface ROS-GUI node] Setup send =");		
+		ROS_INFO("[Interface ROS-GUI node] ThetaMin = %f", minTheta);		
+		ROS_INFO("[Interface ROS-GUI node] ThetaMax = %f", maxTheta);			
+		ROS_INFO("[Interface ROS-GUI node] PhiMin = %f", minPhi);			
+		ROS_INFO("[Interface ROS-GUI node] PhiMax = %f", maxPhi);			
+		ROS_INFO("[Interface ROS-GUI node] Acquisition time = %f", AcTime);			
+		ROS_INFO("[Interface ROS-GUI node] N_Points = %d", Npts);	
+		this->callback_getRFData(getRFSrv.response.RFOutput);
+	}else{		
+		ROS_INFO("[Interface ROS-GUI node] Service Call failed !");
+	}
+	
+}
+
+
+
+
+

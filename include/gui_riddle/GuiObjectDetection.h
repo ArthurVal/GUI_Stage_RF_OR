@@ -1,6 +1,8 @@
 #ifndef MYGUIOD_H
 #define MYGUIOD_H
 
+#include <cstdlib>
+
 #include <QApplication>
 #include <QtGui>
 
@@ -44,12 +46,36 @@ class GuiObjectDetection: public QWidget
 		void startInterfaceROSThread();
 		void stopInterfaceROSThread();
 
+	signals:
+		void startRFAcquisition(	const double &minP,
+															const double &maxP,
+															const double &minT,
+															const double &maxT,
+															const double &AcTime,
+															const unsigned int &Npts);
+
 	public slots: 
+			//Input (RF data)
 		void updateRFData(int index,  
 											const QVector<double> &x_phi, 
 											const QVector<double> &y_phi, 
 											const QVector<double> &x_theta, 
-											const QVector<double> &y_theta);
+											const QVector<double> &y_theta); 
+
+			//Internal (Setup RF data QlineEdit interface)
+
+		void updateMinTheta();
+		void updateMaxTheta();
+
+		void updateMinPhi();
+		void updateMaxPhi();
+
+		void updateAcTime();
+		void updateNPoints(); 
+
+			//Output (QPushButton activation => send signal to ROS Service)
+		void startAcquisition(); 
+
 
 	private:
 			//Attributs
@@ -70,6 +96,9 @@ class GuiObjectDetection: public QWidget
 		
 		QTabWidget *tabParam;
 		QWidget *tabPageRF;
+		QLineEdit *line[6];
+		QPushButton *StartRFButton;
+
 		QWidget *tabPageVision;
 		QWidget *tabPageFusion;
 	
@@ -81,10 +110,8 @@ class GuiObjectDetection: public QWidget
 		unsigned int sizeLabels;
 		unsigned int GUI_OK;
 	
-		double minPhi;	
-		double maxPhi;	
-		double minTheta;	
-		double maxTheta;
+		double minTheta, maxTheta, minPhi, maxPhi, acquisitionTime;
+		unsigned int nPoint;
 
 };
 
