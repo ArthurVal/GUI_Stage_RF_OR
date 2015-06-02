@@ -24,7 +24,6 @@ void nodeROSGUI::init_ROS(int argc, char** argv){
 
 	ROS_INFO("Subscribing to rf_riddle_intensity_map_topic topic.");	
 	chatter_pub_gauss = n->subscribe("rf_riddle_intensity_map_topic", 100, &nodeROSGUI::callback_getRFData, this);
-
 	if(!chatter_pub_gauss){	
 		ROS_INFO("Subscribing to rf_riddle_intensity_map FAILED.");
 	}
@@ -97,7 +96,7 @@ void nodeROSGUI::getDataRF(	const double &minPhi,
 														const unsigned int &Npts)
 {
 	
-	ROS_INFO("[Interface ROS-GUI node] Slot called");
+	//ROS_INFO("[Interface ROS-GUI node] Slot called");
 
 	if(!isRemote)
 		return ;
