@@ -112,17 +112,19 @@ void nodeROSGUI::getDataRF(	const double &minPhi,
 	getRFSrv.request.rfSetupNeeded.nPoints = Npts;
 
 	if(chatter_client_gauss.call(getRFSrv)){
-		ROS_INFO("[Interface ROS-GUI node] Service Call succeed:");
+		ROS_INFO("[Interface ROS-GUI node] Service Call succeed.");/*
 		ROS_INFO("[Interface ROS-GUI node] Setup send =");		
 		ROS_INFO("[Interface ROS-GUI node] ThetaMin = %f", minTheta);		
 		ROS_INFO("[Interface ROS-GUI node] ThetaMax = %f", maxTheta);			
 		ROS_INFO("[Interface ROS-GUI node] PhiMin = %f", minPhi);			
 		ROS_INFO("[Interface ROS-GUI node] PhiMax = %f", maxPhi);			
 		ROS_INFO("[Interface ROS-GUI node] Acquisition time = %f", AcTime);			
-		ROS_INFO("[Interface ROS-GUI node] N_Points = %d", Npts);	
+		ROS_INFO("[Interface ROS-GUI node] N_Points = %d", Npts);	*/
 		this->callback_getRFData(getRFSrv.response.RFOutput);
 	}else{		
-		ROS_INFO("[Interface ROS-GUI node] Service Call failed !");
+		ROS_INFO("[Interface ROS-GUI node] Service Call failed /!\\ : ");
+		ROS_INFO("[Interface ROS-GUI node] -> Be sure that the rf_riddle_node has been started with --remote args ");
+		ROS_INFO("[Interface ROS-GUI node] -> Check services with \"rosservice list\" command on a termianl");
 	}
 	
 }

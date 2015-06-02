@@ -94,12 +94,17 @@ class GuiObjectDetection: public QWidget
 		QVBoxLayout *vBoxParamVision;
 		QVBoxLayout *vBoxParamFusion;
 		
+			//Members of RF Parameters window
 		QTabWidget *tabParam;
 		QWidget *tabPageRF;
 		QLineEdit *line[6];
 		QPushButton *StartRFButton;
-
+		QProgressBar* progressBarRF;
+		
+			//Members of Vision Parameters window
 		QWidget *tabPageVision;
+		
+			//Members of Fusion Parameters window
 		QWidget *tabPageFusion;
 	
 		QGridLayout *mainGridBox;
