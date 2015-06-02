@@ -175,12 +175,12 @@ void GuiObjectDetection::setupGUI_1(char* path_rviz_config_file){
 	labels[0]->setText("RF Parameters");
 	labels[0]->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 
-	labels[1]->setText("=== TBD ===");
+	labels[1]->setText("=== TBD (No parameters yet) ===");
 	labels[1]->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
 	labels[1]->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 	labels[1]->setStyleSheet("QLabel { background-color : white; color : black; }");
 
-	labels[2]->setText("=== TBD ===");
+	labels[2]->setText("=== TBD (No parameters yet) ===");
 	labels[2]->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
 	labels[2]->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 	labels[2]->setStyleSheet("QLabel { background-color : white; color : black; }");
@@ -190,6 +190,14 @@ void GuiObjectDetection::setupGUI_1(char* path_rviz_config_file){
 
 			// ---- RF Param -----
 	gridBoxParamRF->addWidget(labels[0],0,0,1,5);
+	QLabel *labelProgressBar = new QLabel();
+	labelProgressBar->setText("RF Acquisiiton Progress :");
+	labelProgressBar->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+	progressBarRF = new QProgressBar();
+	progressBarRF->setRange(0,1);
+	progressBarRF->setValue(1);
+	gridBoxParamRF->addWidget(labelProgressBar,1,0,1,3);
+	gridBoxParamRF->addWidget(progressBarRF,1,3,1,2);
 
 	QLabel *label_text[6];
 	label_text[0] = new QLabel();
@@ -216,13 +224,13 @@ void GuiObjectDetection::setupGUI_1(char* path_rviz_config_file){
 	label_text[5]->setText(QChar(0x03B8)); //Theta
 	label_text[5]->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 
-	gridBoxParamRF->addWidget(label_text[0],1,1,1,1);
-	gridBoxParamRF->addWidget(label_text[1],1,2,1,1);
-	gridBoxParamRF->addWidget(label_text[2],1,3,1,1);
-	gridBoxParamRF->addWidget(label_text[3],1,4,1,1);
+	gridBoxParamRF->addWidget(label_text[0],2,1,1,1);
+	gridBoxParamRF->addWidget(label_text[1],2,2,1,1);
+	gridBoxParamRF->addWidget(label_text[2],2,3,1,1);
+	gridBoxParamRF->addWidget(label_text[3],2,4,1,1);
 
-	gridBoxParamRF->addWidget(label_text[4],2,0,1,1);
-	gridBoxParamRF->addWidget(label_text[5],3,0,1,1);
+	gridBoxParamRF->addWidget(label_text[4],3,0,1,1);
+	gridBoxParamRF->addWidget(label_text[5],4,0,1,1);
 	
 	QDoubleValidator *validator[5];
 	QIntValidator *validatorPoints;
@@ -234,7 +242,7 @@ void GuiObjectDetection::setupGUI_1(char* path_rviz_config_file){
 	line[0]->setValidator(validator[0]);
 	connect(line[0], SIGNAL(editingFinished()), this, SLOT(updateMinPhi()));
 
-	gridBoxParamRF->addWidget(line[0],2,1,1,1);
+	gridBoxParamRF->addWidget(line[0],3,1,1,1);
  
 		//max Phi
 	line[1] = new QLineEdit("180");
@@ -243,7 +251,7 @@ void GuiObjectDetection::setupGUI_1(char* path_rviz_config_file){
 	line[1]->setValidator(validator[1]);
 	connect(line[1], SIGNAL(editingFinished()), this, SLOT(updateMaxPhi()));
 
-	gridBoxParamRF->addWidget(line[1],2,2,1,1);
+	gridBoxParamRF->addWidget(line[1],3,2,1,1);
  
 		//min Theta
 	line[2] = new QLineEdit("0");
@@ -252,7 +260,7 @@ void GuiObjectDetection::setupGUI_1(char* path_rviz_config_file){
 	line[2]->setValidator(validator[2]);
 	connect(line[2], SIGNAL(editingFinished()), this, SLOT(updateMinTheta()));
 
-	gridBoxParamRF->addWidget(line[2],3,1,1,1);
+	gridBoxParamRF->addWidget(line[2],4,1,1,1);
  
 		//max Theta
 	line[3] = new QLineEdit("180");
@@ -261,7 +269,7 @@ void GuiObjectDetection::setupGUI_1(char* path_rviz_config_file){
 	line[3]->setValidator(validator[3]);
 	connect(line[3], SIGNAL(editingFinished()), this, SLOT(updateMaxTheta()));
 
-	gridBoxParamRF->addWidget(line[3],3,2,1,1);
+	gridBoxParamRF->addWidget(line[3],4,2,1,1);
  
 		//Duree
 	line[4] = new QLineEdit("1");
@@ -270,7 +278,7 @@ void GuiObjectDetection::setupGUI_1(char* path_rviz_config_file){
 	line[4]->setValidator(validator[4]);
 	connect(line[4], SIGNAL(editingFinished()), this, SLOT(updateAcTime()));
 
-	gridBoxParamRF->addWidget(line[4],2,3,1,1);
+	gridBoxParamRF->addWidget(line[4],3,3,1,1);
  
 		//N_point
 	line[5] = new QLineEdit("360");
@@ -279,12 +287,12 @@ void GuiObjectDetection::setupGUI_1(char* path_rviz_config_file){
 	line[5]->setValidator(validatorPoints);
 	connect(line[5], SIGNAL(editingFinished()), this, SLOT(updateNPoints()));
 
-	gridBoxParamRF->addWidget(line[5],2,4,1,1);
+	gridBoxParamRF->addWidget(line[5],3,4,1,1);
 
 	StartRFButton = new QPushButton("Start RF");
 	connect(StartRFButton, SIGNAL(clicked()), this, SLOT(startAcquisition()) );
 
-	gridBoxParamRF->addWidget(StartRFButton,3,3,1,2);
+	gridBoxParamRF->addWidget(StartRFButton,4,3,1,2);
 
 
 	gridBoxParamRF->setColumnStretch(0,1);
@@ -294,9 +302,9 @@ void GuiObjectDetection::setupGUI_1(char* path_rviz_config_file){
 	for(int i = 0 ; i < 4 ; ++i )		
 		gridBoxParamRF->setRowStretch(i,1);
 
-			// ---- ORK Param ---- 	
+			// ---- ORK Param ---- TODO	
 	vBoxParamVision->addWidget(labels[1]);	
-			// ---- Fusion Param ---- 
+			// ---- Fusion Param ---- TODO
 	vBoxParamFusion->addWidget(labels[2]);	
 
 		//Setup Tab Widget
@@ -363,6 +371,9 @@ void GuiObjectDetection::stopInterfaceROSThread()
 
 void GuiObjectDetection::updateRFData(int index, const QVector<double> &x_phi, const QVector<double> &y_phi, const QVector<double> &x_theta, const QVector<double> &y_theta)
 {
+	progressBarRF->setRange(0,1);
+	progressBarRF->setValue(1);
+
 	curveIntensity->setSamples(x_phi,y_phi);
 	rfPlotIntensity->replot();
 
@@ -527,5 +538,6 @@ void GuiObjectDetection::startAcquisition()
 	std::cout << "[GUI RIDDLE] [DEBUG] maxTheta = " << maxTheta << std::endl;
 	std::cout << "[GUI RIDDLE] [DEBUG] acquisitionTime = " << acquisitionTime << std::endl;
 	std::cout << "[GUI RIDDLE] [DEBUG] nPoint = " << nPoint << std::endl;
+	progressBarRF->setRange(0,0);
 	emit startRFAcquisition(minPhi,maxPhi,minTheta,maxTheta,acquisitionTime,nPoint);
 }
