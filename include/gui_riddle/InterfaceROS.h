@@ -6,11 +6,6 @@
 
 #include "nodeROSGUI.h"
 
-#include "ros/ros.h"
-#include "ros/node_handle.h"
-#include "ros/callback_queue.h"
-
-
 #define ROS_GUI_FREQ 10
 
 	
@@ -26,7 +21,8 @@ class InterfaceROS: public QThread
 		~InterfaceROS() {};
 
 			//Get Attributs
-		inline bool getEndThreadRos() {return endThreadRos;};
+		inline bool getEndThreadRos() {return endThreadRos;}
+		QObject* getNodeROSPtr() {return nodeROS;}
 
 
 			//Main function (ros spin)
@@ -38,6 +34,12 @@ class InterfaceROS: public QThread
 																const QVector<double> &y_phi, 
 																const QVector<double> &x_theta, 
 																const QVector<double> &y_theta);
+		void transfertStartRFToNode(	const double &minPhi,
+																	const double &maxPhi,
+																	const double &minTheta,
+																	const double &maxTheta,
+																	const double &AcTime,
+																	const unsigned int &Npts);
 
 	public slots:
 		void disableThread();
@@ -47,10 +49,15 @@ class InterfaceROS: public QThread
 																const QVector<double> &x_theta, 
 																const QVector<double> &y_theta);
 
+		void transfertStartRF(	const double &minPhi,
+														const double &maxPhi,
+														const double &minTheta,
+														const double &maxTheta,
+														const double &AcTime,
+														const unsigned int &Npts);
+
 	private:
 			//Attributs
-		ros::NodeHandle* n;
-		ros::Subscriber chatter_pub_gauss;
 		nodeROSGUI *nodeROS;
 		int argc_;
 		char** argv_;

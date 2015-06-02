@@ -1,6 +1,8 @@
 #ifndef MYGUIOD_H
 #define MYGUIOD_H
 
+#include <cstdlib>
+
 #include <QApplication>
 #include <QtGui>
 
@@ -44,29 +46,72 @@ class GuiObjectDetection: public QWidget
 		void startInterfaceROSThread();
 		void stopInterfaceROSThread();
 
+	signals:
+		void startRFAcquisition(	const double &minP,
+															const double &maxP,
+															const double &minT,
+															const double &maxT,
+															const double &AcTime,
+															const unsigned int &Npts);
+
 	public slots: 
+			//Input (RF data)
 		void updateRFData(int index,  
 											const QVector<double> &x_phi, 
 											const QVector<double> &y_phi, 
 											const QVector<double> &x_theta, 
-											const QVector<double> &y_theta);
+											const QVector<double> &y_theta); 
+
+			//Internal (Setup RF data QlineEdit interface)
+
+		void updateMinTheta();
+		void updateMaxTheta();
+
+		void updateMinPhi();
+		void updateMaxPhi();
+
+		void updateAcTime();
+		void updateNPoints(); 
+
+			//Output (QPushButton activation => send signal to ROS Service)
+		void startAcquisition(); 
+
 
 	private:
 			//Attributs
-		rviz::VisualizationFrame *rvizPanel;		
+		rviz::VisualizationFrame *rvizPanel;
+		
 		QwtPlot *rfPlotIntensity;
-		QwtPlotCurve *curveIntensity;		
+		QwtPlotCurve *curveIntensity;
+		
 		QwtPlot *rfPlotIntensityTheta;
 		QwtPlotCurve *curveIntensityTheta;
+
 		QRadioButton *rButtons[N_RBUTTON_MAX];
 		QLabel *labels[N_LABEL_MAX];
-		QVBoxLayout *vBoxParam;
+
+		QGridLayout *gridBoxParamRF;
+		QVBoxLayout *vBoxParamVision;
+		QVBoxLayout *vBoxParamFusion;
+		
+		QTabWidget *tabParam;
+		QWidget *tabPageRF;
+		QLineEdit *line[6];
+		QPushButton *StartRFButton;
+
+		QWidget *tabPageVision;
+		QWidget *tabPageFusion;
+	
 		QGridLayout *mainGridBox;
+
 		InterfaceROS *InterfaceROSGUI;
+
 		unsigned int sizeRButtons;			
 		unsigned int sizeLabels;
-		unsigned int GUI_OK;	
-
+		unsigned int GUI_OK;
+	
+		double minTheta, maxTheta, minPhi, maxPhi, acquisitionTime;
+		unsigned int nPoint;
 
 };
 

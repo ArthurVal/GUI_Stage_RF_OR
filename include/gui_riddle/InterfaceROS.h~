@@ -4,11 +4,9 @@
 #include <QtGui>
 #include <QObject>
 
-#include "ros/ros.h"
-#include "ros/node_handle.h"
-#include "rf_riddle/RF.h"
+#include "nodeROSGUI.h"
 
-#define ROS_GUI_FREQ 1
+#define ROS_GUI_FREQ 10
 
 	
 class InterfaceROS: public QThread
@@ -23,27 +21,50 @@ class InterfaceROS: public QThread
 		~InterfaceROS() {};
 
 			//Get Attributs
-		inline bool getEndThreadRos() {return endThreadRos;};
+		inline bool getEndThreadRos() {return endThreadRos;}
+		QObject* getNodeROSPtr() {return nodeROS;}
 
 
 			//Main function (ros spin)
 		void run();
 
-	public slots:
-		void disableThread();
+	signals:
+		void transfertInputDataToGUI(int index, 
+																const QVector<double> &x_phi, 
+																const QVector<double> &y_phi, 
+																const QVector<double> &x_theta, 
+																const QVector<double> &y_theta);
 
 	signals:
-		void newInputData(int index, const QVector<float> &x, const QVector<float> &y);
+		void transfertStartRFToNode(	const double &minPhi,
+																	const double &maxPhi,
+																	const double &minTheta,
+																	const double &maxTheta,
+																	const double &AcTime,
+																	const unsigned int &Npts);
+
+	public slots:
+		void disableThread();
+		void newDataFromNodeROS(int index, 
+																const QVector<double> &x_phi, 
+																const QVector<double> &y_phi, 
+																const QVector<double> &x_theta, 
+																const QVector<double> &y_theta);
+
+		void transfertStartRF(	const double &minPhi,
+														const double &maxPhi,
+														const double &minTheta,
+														const double &maxTheta,
+														const double &AcTime,
+														const unsigned int &Npts);
 
 	private:
 			//Attributs
-		ros::NodeHandle* n;
-		ros::Subscriber chatter_pub_gauss;
-		ros::Rate *loop_rate;
+		nodeROSGUI *nodeROS;
+		int argc_;
+		char** argv_;
 		bool endThreadRos;
 
-			//callback ROS		
-		void callback_getRFData(const rf_riddle::RF &rf_data);
 };
 
 #endif // INTERFACEROS_H
