@@ -16,14 +16,14 @@ void nodeROSGUI::init_ROS(int argc, char** argv){
   
 	n = new ros::NodeHandle;
 	
-	chatter_client_gauss = n->serviceClient<rf_riddle::getRFData>("rf_riddle_intensity_map");
+	chatter_client_gauss = n->serviceClient<rf_riddle::getRFData>("rf_riddle_intensity_map_srv");
 	if(chatter_client_gauss){
 		isRemote = true;
-		ROS_INFO("Connection to rf_riddle_intensity_map Service (getRFData).");
+		ROS_INFO("Connection to rf_riddle_intensity_map_srv Service (getRFData).");
 	}
 
-	ROS_INFO("Subscribing to rf_riddle_intensity_map topic.");	
-	chatter_pub_gauss = n->subscribe("rf_riddle_intensity_map", 100, &nodeROSGUI::callback_getRFData, this);
+	ROS_INFO("Subscribing to rf_riddle_intensity_map_topic topic.");	
+	chatter_pub_gauss = n->subscribe("rf_riddle_intensity_map_topic", 100, &nodeROSGUI::callback_getRFData, this);
 
 	if(!chatter_pub_gauss){	
 		ROS_INFO("Subscribing to rf_riddle_intensity_map FAILED.");
