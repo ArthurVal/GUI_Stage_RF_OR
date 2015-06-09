@@ -10,6 +10,8 @@ InterfaceROS::InterfaceROS(int argc, char* argv[], QWidget* parent)
 	argc_ = argc;
 	argv_ = argv;
 
+	checkBoxConnected = false;
+
 	nodeROS = new nodeROSGUI;	
 	qRegisterMetaType< QVector<double> >("QVector<double>");
 
@@ -69,6 +71,15 @@ void InterfaceROS::transfertStartRF(	const double &minPhi,
 	emit transfertStartRFToNode(minPhi,maxPhi,minTheta,maxTheta,AcTime,Npts);
 }
 
+/*========================================================================*/
+/*---------------		InterfaceROS::transfertStartRF()		----------------*/
+/*========================================================================*/
+void InterfaceROS::connectCheckBox(QWidget* checkRemote, QWidget* checkTheta)
+{
+	connect(checkRemote, SIGNAL(stateChanged(int)), nodeROS, SLOT(stateChangedIsRemote(const int&)));
+	connect(checkTheta, SIGNAL(stateChanged(int)), nodeROS, SLOT(stateChangedThetaDisable(const int&)));
+	checkBoxConnected = true;
+}
 
 /*==================================================================*/
 /*--------------------		InterfaceROS::run()		--------------------*/

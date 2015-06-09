@@ -21,7 +21,7 @@ GuiObjectDetection::GuiObjectDetection(int argc, char* argv[], unsigned int n_la
 	mainGridBox = new QGridLayout();
 
 		//Setup the interface ROS/Qt
-	InterfaceROSGUI = new InterfaceROS(argc,argv);
+	InterfaceROSGUI = new InterfaceROS(argc,argv,this);
 
 	connect(InterfaceROSGUI, 	SIGNAL(transfertInputDataToGUI(	const int&, 	
 																														const QVector<double>&, 
@@ -114,7 +114,14 @@ GuiObjectDetection::GuiObjectDetection(int argc, char* argv[], unsigned int n_la
 	vBoxParamFusion = new QVBoxLayout();
 
 	tabParam = new QTabWidget();
+
 	tabPageRF = new QWidget();
+
+	checkBoxRF[0] = new QCheckBox("Remote Control");
+	checkBoxRF[1] = new QCheckBox("Theta enable");
+	connect(checkBoxRF[0], SIGNAL(stateChanged(int)), this, SLOT(updateIsRemote(const int)));
+	connect(checkBoxRF[1], SIGNAL(stateChanged(int)), this, SLOT(updateThetaDisable(const int)));
+
 	tabPageVision = new QWidget();
 	tabPageFusion = new QWidget();
 
@@ -125,6 +132,14 @@ GuiObjectDetection::GuiObjectDetection(int argc, char* argv[], unsigned int n_la
 
 	acquisitionTime = 1;
 	nPoint = 360;
+
+	timerRF = new QTimer(this);
+
+	isRemote = true;
+	thetaDisable = true;
+
+	timerRFtimeout = false;
+	isRunningRFAcquisition = false;
 		
 	GUI_OK = 0;
 }
@@ -186,19 +201,33 @@ void GuiObjectDetection::setupGUI_1(char* path_rviz_config_file){
 	labels[2]->setStyleSheet("QLabel { background-color : white; color : black; }");
 
 
-		//Setup Vlayout
+		//Setup tab Param
 
 			// ---- RF Param -----
-	gridBoxParamRF->addWidget(labels[0],0,0,1,5);
+				// => Title
+	gridBoxParamRF->addWidget(labels[0],0,0,1,3);
 	QLabel *labelProgressBar = new QLabel();
 	labelProgressBar->setText("RF Acquisiiton Progress :");
 	labelProgressBar->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+
+				// => CheckBox Remote & Theta
+	QWidget* tmpWidgetCheckBox = new QWidget();
+	QVBoxLayout* tmpVBoxLayout = new QVBoxLayout();
+	InterfaceROSGUI->connectCheckBox(checkBoxRF[0],checkBoxRF[1]);
+	tmpVBoxLayout->addWidget(checkBoxRF[0]);
+	tmpVBoxLayout->addWidget(checkBoxRF[1]);
+	tmpWidgetCheckBox->setLayout(tmpVBoxLayout);
+	gridBoxParamRF->addWidget(tmpWidgetCheckBox,0,3,1,2);
+
+				// => ProgressBar
 	progressBarRF = new QProgressBar();
 	progressBarRF->setRange(0,1);
 	progressBarRF->setValue(1);
 	gridBoxParamRF->addWidget(labelProgressBar,1,0,1,3);
 	gridBoxParamRF->addWidget(progressBarRF,1,3,1,2);
 
+
+				// => Text for Edit
 	QLabel *label_text[6];
 	label_text[0] = new QLabel();
 	label_text[0]->setText("min");
@@ -231,7 +260,10 @@ void GuiObjectDetection::setupGUI_1(char* path_rviz_config_file){
 
 	gridBoxParamRF->addWidget(label_text[4],3,0,1,1);
 	gridBoxParamRF->addWidget(label_text[5],4,0,1,1);
-	
+
+
+
+				// => Edit windows with parameters & validators	
 	QDoubleValidator *validator[5];
 	QIntValidator *validatorPoints;
  
@@ -289,11 +321,12 @@ void GuiObjectDetection::setupGUI_1(char* path_rviz_config_file){
 
 	gridBoxParamRF->addWidget(line[5],3,4,1,1);
 
+
+				// => Start Button
 	StartRFButton = new QPushButton("Start RF");
-	connect(StartRFButton, SIGNAL(clicked()), this, SLOT(startAcquisition()) );
+	connect( StartRFButton, SIGNAL(clicked()), this, SLOT(startAcquisition()) );
 
 	gridBoxParamRF->addWidget(StartRFButton,4,3,1,2);
-
 
 	gridBoxParamRF->setColumnStretch(0,1);
 	for(int i = 1 ; i < 5 ; ++i )		
@@ -301,6 +334,11 @@ void GuiObjectDetection::setupGUI_1(char* path_rviz_config_file){
 
 	for(int i = 0 ; i < 4 ; ++i )		
 		gridBoxParamRF->setRowStretch(i,1);
+
+		//Set Timer for singleshot
+	timerRF->setSingleShot(true);
+	connect(timerRF,SIGNAL(timeout()),this,SLOT(timerRFTimeout()));
+
 
 			// ---- ORK Param ---- TODO	
 	vBoxParamVision->addWidget(labels[1]);	
@@ -334,7 +372,10 @@ void GuiObjectDetection::setupGUI_1(char* path_rviz_config_file){
 
 	//rfPlotIntensity->updateCanvasMargins();
 
-	this->setLayout(mainGridBox);
+	this->setLayout(mainGridBox);	
+
+	checkBoxRF[0]->setCheckState(Qt::Checked);
+	checkBoxRF[1]->setCheckState(Qt::Unchecked);
 
 	GUI_OK = 1;
 }
@@ -371,14 +412,75 @@ void GuiObjectDetection::stopInterfaceROSThread()
 
 void GuiObjectDetection::updateRFData(int index, const QVector<double> &x_phi, const QVector<double> &y_phi, const QVector<double> &x_theta, const QVector<double> &y_theta)
 {
-	progressBarRF->setRange(0,1);
-	progressBarRF->setValue(1);
+	this->runningRFActivity(false);
 
 	curveIntensity->setSamples(x_phi,y_phi);
 	rfPlotIntensity->replot();
 
 	curveIntensityTheta->setSamples(y_theta,x_theta);
 	rfPlotIntensityTheta->replot();
+}
+
+/*=======================================================================================*/
+/*-------------------		SLOT : GuiObjectDetection::runningRFActivity()		---------------------*/
+/*=======================================================================================*/
+
+void GuiObjectDetection::runningRFActivity(const bool &isRunning)
+{
+	if(isRunning && !timerRFtimeout){ //Ask for running & no timer active (normal start activity)
+		isRunningRFAcquisition = true;
+		checkBoxRF[0]->setEnabled(false);
+		checkBoxRF[1]->setEnabled(false);
+		StartRFButton->setEnabled(false);
+		progressBarRF->setRange(0,0);
+		timerRF->start((int)(2 * acquisitionTime*1000));
+
+	}else{
+
+		if(!isRunning && !timerRFtimeout){ //Ask for stop running & timer active (data received)
+			isRunningRFAcquisition = false;
+			checkBoxRF[0]->setEnabled(true);
+			checkBoxRF[1]->setEnabled(true);
+			StartRFButton->setEnabled(true);
+			progressBarRF->setRange(0,1);
+			progressBarRF->setValue(1);
+			timerRF->stop();
+
+		}else{
+
+			if(!isRunning && timerRFtimeout){ //Ask for stop running & timer timeout (=timeout)
+				isRunningRFAcquisition = false;
+				checkBoxRF[0]->setEnabled(true);
+				checkBoxRF[1]->setEnabled(true);
+				StartRFButton->setEnabled(true);
+				progressBarRF->setRange(0,1);
+				progressBarRF->setValue(0);
+			
+			}else{//Ask for running & timer timeout (impossible) => restart timer
+				isRunningRFAcquisition = true;
+				checkBoxRF[0]->setEnabled(false);
+				checkBoxRF[1]->setEnabled(false);
+				StartRFButton->setEnabled(false);
+				progressBarRF->setRange(0,0);
+				timerRF->start((int)(2 * acquisitionTime*1000));
+			}
+		}
+	}
+
+
+}
+
+/*=======================================================================================*/
+/*-------------------		SLOT : GuiObjectDetection::timerRFTimeout()		---------------------*/
+/*=======================================================================================*/
+
+void GuiObjectDetection::timerRFTimeout()
+{
+	if(isRunningRFAcquisition){
+		timerRFtimeout = true;
+		this->runningRFActivity(false);
+		timerRFtimeout = false;
+	}
 }
 
 /*=============================================================================*/
@@ -525,7 +627,56 @@ void GuiObjectDetection::updateNPoints()
 }
 
 /*=============================================================================*/
-/*-----------		SLOT : GuiObjectDetection::startAcquisition()		-----------------*/
+/*-----------		SLOT : GuiObjectDetection::updateIsRemote()		-----------------*/
+/*=============================================================================*/
+void GuiObjectDetection::updateIsRemote(const int &stateRemote)
+{	
+	switch(stateRemote){
+		case 0: //Unchecked
+			isRemote = false;
+			StartRFButton->setText("Update Params");
+		break;
+
+		case 1: //PartiallyChecked
+			isRemote = false;
+			StartRFButton->setText("Update Params");
+		break;
+
+		case 2: //Checked
+			isRemote = true;
+			StartRFButton->setText("Start RF");
+		break;
+
+		default:
+			isRemote = false;
+			StartRFButton->setText("Update Params");
+	}
+}
+
+/*=================================================================================*/
+/*-----------		SLOT : GuiObjectDetection::updateThetaDisable()		-----------------*/
+/*=================================================================================*/
+void GuiObjectDetection::updateThetaDisable(const int &stateThetaDis)
+{
+	switch(stateThetaDis){
+		case 0: //Unchecked
+			thetaDisable = true;
+		break;
+
+		case 1: //PartiallyChecked
+			thetaDisable = true;
+		break;
+
+		case 2: //Checked
+			thetaDisable = false;
+		break;
+
+		default:
+			thetaDisable = true;
+	}	
+}
+/*=============================================================================*/
+/*-----------		SLOT : GuiObjectDetection::startAcquisition()		---------------*/
 /*=============================================================================*/
 
 void GuiObjectDetection::startAcquisition()
@@ -538,6 +689,9 @@ void GuiObjectDetection::startAcquisition()
 	std::cout << "[GUI RIDDLE] [DEBUG] maxTheta = " << maxTheta << std::endl;
 	std::cout << "[GUI RIDDLE] [DEBUG] acquisitionTime = " << acquisitionTime << std::endl;
 	std::cout << "[GUI RIDDLE] [DEBUG] nPoint = " << nPoint << std::endl;
-	progressBarRF->setRange(0,0);
+
+	if(isRemote)
+		this->runningRFActivity(true);
+
 	emit startRFAcquisition(minPhi,maxPhi,minTheta,maxTheta,acquisitionTime,nPoint);
 }
