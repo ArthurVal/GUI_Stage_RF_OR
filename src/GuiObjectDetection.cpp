@@ -530,7 +530,7 @@ void GuiObjectDetection::updateNPoints()
 
 void GuiObjectDetection::startAcquisition()
 {
-	std::cout << "[GUI RIDDLE] [DEBUG] Bouton clicked" << std::endl;
+	std::cout << "[GUI RIDDLE] [DEBUG] Bouton clicked -> Start Acquisition" << std::endl;
 	std::cout << "[GUI RIDDLE] [DEBUG] Data transmitted" << std::endl;
 	std::cout << "[GUI RIDDLE] [DEBUG] minPhi = " << minPhi << std::endl;
 	std::cout << "[GUI RIDDLE] [DEBUG] maxPhi = " << maxPhi << std::endl;

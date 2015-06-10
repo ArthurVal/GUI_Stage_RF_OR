@@ -69,7 +69,7 @@ GuiObjectDetection::GuiObjectDetection(int argc, char* argv[], unsigned int n_la
 	rfPlotIntensityTheta = new QwtPlot(QwtText("Intensity map from RF sensor (Theta)"));
 	rfPlotIntensityTheta->enableAxis(QwtPlot::yRight,true);
 	rfPlotIntensityTheta->enableAxis(QwtPlot::yLeft,false);
-	rfPlotIntensityTheta->setAxisTitle(QwtPlot::yRight, "<FONT color=#0000ff  face=Arial size=2><B>  Vertival Angle Theta (Degree)  </FONT>");
+	rfPlotIntensityTheta->setAxisTitle(QwtPlot::yRight, "<FONT color=#0000ff  face=Arial size=2><B>  Vertical Angle Theta (Degree)  </FONT>");
 	rfPlotIntensityTheta->setAxisScale(QwtPlot::yRight, 180, 0);
 	rfPlotIntensityTheta->setAxisScale(QwtPlot::yLeft, 180, 0);
 	rfPlotIntensityTheta->setAxisTitle(QwtPlot::xBottom, "<FONT color=#0000ff  face=Arial size=2><B>Intensity</FONT>");
