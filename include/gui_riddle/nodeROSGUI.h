@@ -8,6 +8,7 @@
 #include "rf_riddle/RFBase.h"
 #include "rf_riddle/RFSetup.h"
 #include "rf_riddle/getRFData.h"
+#include "rf_riddle/setRFParam.h"
 
 
 #include "ros/ros.h"
@@ -23,7 +24,13 @@ class nodeROSGUI: public QObject
 		ros::NodeHandle* n;
 		ros::Subscriber chatter_pub_gauss;
 		ros::ServiceClient chatter_client_gauss;
+		ros::ServiceClient chatter_client_param;
 		bool isRemote;
+		bool thetaDisable;
+		double minTheta, maxTheta, minPhi, maxPhi, acquisitionTime;
+		unsigned int nPoint;
+
+		bool requestSend;
 
 		//Methods
 			//Constructors
@@ -46,12 +53,15 @@ class nodeROSGUI: public QObject
 																const QVector<double> &y_theta);
 
 	public slots:
-		void getDataRF(	const double &minPhi,
-										const double &maxPhi,
-										const double &minTheta,
-										const double &maxTheta,
+		void getDataRF(	const double &minP,
+										const double &maxP,
+										const double &minT,
+										const double &maxT,
 										const double &AcTime,
 										const unsigned int &Npts);
+		void setParamRF();
+		void stateChangedIsRemote(const int &newStateRemote);
+		void stateChangedThetaDisable(const int &newStateThetaDis);
 
 	protected:
 

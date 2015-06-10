@@ -53,6 +53,7 @@ class GuiObjectDetection: public QWidget
 															const double &maxT,
 															const double &AcTime,
 															const unsigned int &Npts);
+		
 
 	public slots: 
 			//Input (RF data)
@@ -60,9 +61,14 @@ class GuiObjectDetection: public QWidget
 											const QVector<double> &x_phi, 
 											const QVector<double> &y_phi, 
 											const QVector<double> &x_theta, 
-											const QVector<double> &y_theta); 
+											const QVector<double> &y_theta);
+
 
 			//Internal (Setup RF data QlineEdit interface)
+
+				//Slot to set RF progress bar in "running" mod and disable checkboxs etc ...
+		void runningRFActivity(const bool &isRunning);
+		void timerRFTimeout();
 
 		void updateMinTheta();
 		void updateMaxTheta();
@@ -72,6 +78,9 @@ class GuiObjectDetection: public QWidget
 
 		void updateAcTime();
 		void updateNPoints(); 
+
+		void updateIsRemote(const int &stateRemote); 
+		void updateThetaDisable(const int &stateThetaDis); 
 
 			//Output (QPushButton activation => send signal to ROS Service)
 		void startAcquisition(); 
@@ -100,6 +109,8 @@ class GuiObjectDetection: public QWidget
 		QLineEdit *line[6];
 		QPushButton *StartRFButton;
 		QProgressBar* progressBarRF;
+		QCheckBox* checkBoxRF[2];
+		QTimer* timerRF;
 		
 			//Members of Vision Parameters window
 		QWidget *tabPageVision;
@@ -117,6 +128,10 @@ class GuiObjectDetection: public QWidget
 	
 		double minTheta, maxTheta, minPhi, maxPhi, acquisitionTime;
 		unsigned int nPoint;
+		bool isRemote;
+		bool thetaDisable;
+		bool isRunningRFAcquisition;
+		bool timerRFtimeout;
 
 };
 

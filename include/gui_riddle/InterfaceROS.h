@@ -25,6 +25,9 @@ class InterfaceROS: public QThread
 		QObject* getNodeROSPtr() {return nodeROS;}
 
 
+			//Function to connect the checkBox from Main GUI to nodeROS slots
+		void connectCheckBox(QWidget* checkRemote, QWidget* checkTheta);
+
 			//Main function (ros spin)
 		void run();
 
@@ -61,7 +64,7 @@ class InterfaceROS: public QThread
 		nodeROSGUI *nodeROS;
 		int argc_;
 		char** argv_;
-		bool endThreadRos;
+		bool endThreadRos, checkBoxConnected;
 
 };
 
