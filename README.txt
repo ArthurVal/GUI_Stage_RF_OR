@@ -18,8 +18,8 @@
 		DESCRIPTION
 
 This package has been create for the RIDDLE project at CNRS-LAAS of Toulouse.
-Its goal is to have an easy way to control and observe both ORK vision algorithm and RF detection system through a simple GUI.
-It communicates with RF_RIDDLE node to give him simple commands, read the outputs from RF_RIDDLE & ORK nodes and plots the result on an RVIZ windows.
+Its goal is to have an easy way to control and observe both ORK vision algorithms and RF detection system through a simple GUI.
+It communicates with RF_RIDDLE node, give it simple commands, read the outputs from RF_RIDDLE & ORK nodes and plot the results on a RVIZ windows.
 
 
 
