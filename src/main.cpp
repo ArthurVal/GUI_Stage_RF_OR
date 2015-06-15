@@ -2,7 +2,9 @@
 #include <QtGui>
 
 #include <unistd.h>
-#include <iostream>
+#include <cstring>
+#include <sys/types.h>
+#include <pwd.h>
 
 #include "GuiObjectDetection.h"
 
@@ -13,8 +15,15 @@ int main(int argc, char *argv[])
 
 	GuiObjectDetection IHM(argc, argv);
 
+	struct passwd *pw = getpwuid(getuid());
+	const char *homedir = pw->pw_dir;
+
+  char homediRVIZ[256];
+	strcpy(homediRVIZ, homedir);
+	strcat(homediRVIZ,"/.rviz/Stage_RF_OR.rviz");
+
 	std::cout << "Setup 1 : ..." << std::endl;
-	IHM.setupGUI_1((char*)"/home/arthur/.rviz/Stage_RF_OR.rviz");
+	IHM.setupGUI_1(homediRVIZ);
 	if(IHM.getGUISetup() > 0){
 		std::cout << "Setup 1 : DONE" << std::endl;
 	}else{		
