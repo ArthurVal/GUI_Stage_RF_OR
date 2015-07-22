@@ -108,7 +108,10 @@ void nodeROSGUI::getDataRF(	const double &minP,
 														const double &minT,
 														const double &maxT,
 														const double &AcTime,
-														const unsigned int &Npts)
+														const unsigned int &Npts,
+														const unsigned int &Nech,
+														const unsigned int &freqCLK,
+														const unsigned int &freqech)
 {
 	
 	//ROS_INFO("[Interface ROS-GUI node] Slot called");
@@ -123,6 +126,9 @@ void nodeROSGUI::getDataRF(	const double &minP,
 
 	acquisitionTime = AcTime;
 	nPoint = Npts;
+	nEch = Nech;
+	freqTSCLK = freqCLK;
+	freqEch = freqech;
 
 	if(!isRemote){
 
@@ -139,6 +145,9 @@ void nodeROSGUI::getDataRF(	const double &minP,
 		getRFSrv.request.rfSetupNeeded.phiMax = maxPhi;
 		getRFSrv.request.rfSetupNeeded.acquisitionTime = acquisitionTime;
 		getRFSrv.request.rfSetupNeeded.nPoints = nPoint;
+		getRFSrv.request.rfSetupNeeded.nEch = nEch;
+		getRFSrv.request.rfSetupNeeded.freqTSCLK = freqTSCLK;
+		getRFSrv.request.rfSetupNeeded.freqEch = freqEch;
 
 		if(chatter_client_gauss.call(getRFSrv)){
 			ROS_INFO("[Interface ROS-GUI node] Service Call succeed.");/*
@@ -148,11 +157,14 @@ void nodeROSGUI::getDataRF(	const double &minP,
 			ROS_INFO("[Interface ROS-GUI node] PhiMin = %f", minPhi);			
 			ROS_INFO("[Interface ROS-GUI node] PhiMax = %f", maxPhi);			
 			ROS_INFO("[Interface ROS-GUI node] Acquisition time = %f", acquisitionTime);			
-			ROS_INFO("[Interface ROS-GUI node] N_Points = %d", nPoint);	*/
+			ROS_INFO("[Interface ROS-GUI node] N_Points = %d", nPoint);			
+			ROS_INFO("[Interface ROS-GUI node] N_ECH = %d", nEch);			
+			ROS_INFO("[Interface ROS-GUI node] FREQ_TSCLK = %d", freqTSCLK);			
+			ROS_INFO("[Interface ROS-GUI node] FREQ_ECH = %d", freqEch);	*/
 			this->callback_getRFData(getRFSrv.response.RFOutput);
 		}else{		
 			ROS_INFO("[Interface ROS-GUI node] Service Call failed /!\\ : ");
-			ROS_INFO("[Interface ROS-GUI node] -> Be sure that the rf_riddle_node has been started with --remote args ");
+			ROS_INFO("[Interface ROS-GUI node] -> Be sure that the rf_riddle_node has been started without --remoteDisable args ");
 			ROS_INFO("[Interface ROS-GUI node] -> Check services with \"rosservice list\" command on a terminal");
 			ROS_INFO("[Interface ROS-GUI node] \t-> rf_riddle_intensity_map_srv service = service to get RF data (Input = Setup / Output = RF data obtained)");
 		}
@@ -176,6 +188,9 @@ void nodeROSGUI::setParamRF()
 	setRFParamSrv.request.rfSetupNeeded.phiMax = maxPhi;
 	setRFParamSrv.request.rfSetupNeeded.acquisitionTime = acquisitionTime;
 	setRFParamSrv.request.rfSetupNeeded.nPoints = nPoint;
+	setRFParamSrv.request.rfSetupNeeded.nEch = nEch;
+	setRFParamSrv.request.rfSetupNeeded.freqTSCLK = freqTSCLK;
+	setRFParamSrv.request.rfSetupNeeded.freqEch = freqEch;
 	setRFParamSrv.request.remote = isRemote;
 	setRFParamSrv.request.thetaDis = thetaDisable;
 
@@ -187,7 +202,10 @@ void nodeROSGUI::setParamRF()
 		ROS_INFO("[Interface ROS-GUI node] PhiMin = %f", minPhi);			
 		ROS_INFO("[Interface ROS-GUI node] PhiMax = %f", maxPhi);			
 		ROS_INFO("[Interface ROS-GUI node] Acquisition time = %f", acquisitionTime);			
-		ROS_INFO("[Interface ROS-GUI node] N_Points = %d", nPoint);	*/
+		ROS_INFO("[Interface ROS-GUI node] N_Points = %d", nPoint);			
+		ROS_INFO("[Interface ROS-GUI node] N_ECH = %d", nEch);			
+		ROS_INFO("[Interface ROS-GUI node] FREQ_TSCLK = %d", freqTSCLK);			
+		ROS_INFO("[Interface ROS-GUI node] FREQ_ECH = %d", freqEch);	*/
 	}else{		
 		ROS_INFO("[Interface ROS-GUI node] Service Call failed /!\\ : ");
 		ROS_INFO("[Interface ROS-GUI node] -> Be sure that the rf_riddle_node has been started with args ");

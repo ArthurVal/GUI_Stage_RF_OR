@@ -28,7 +28,7 @@ class nodeROSGUI: public QObject
 		bool isRemote;
 		bool thetaDisable;
 		double minTheta, maxTheta, minPhi, maxPhi, acquisitionTime;
-		unsigned int nPoint;
+		unsigned int nPoint, freqTSCLK, freqEch, nEch;
 
 		bool requestSend;
 
@@ -58,7 +58,10 @@ class nodeROSGUI: public QObject
 										const double &minT,
 										const double &maxT,
 										const double &AcTime,
-										const unsigned int &Npts);
+										const unsigned int &Npts,
+										const unsigned int &Nech,
+										const unsigned int &freqCLK,
+										const unsigned int &freqech);
 		void setParamRF();
 		void stateChangedIsRemote(const int &newStateRemote);
 		void stateChangedThetaDisable(const int &newStateThetaDis);

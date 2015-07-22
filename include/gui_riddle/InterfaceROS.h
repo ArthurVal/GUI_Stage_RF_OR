@@ -42,7 +42,10 @@ class InterfaceROS: public QThread
 																	const double &minTheta,
 																	const double &maxTheta,
 																	const double &AcTime,
-																	const unsigned int &Npts);
+																	const unsigned int &Npts,
+																	const unsigned int &Nech,
+																	const unsigned int &freqCLK,
+																	const unsigned int &freqech);
 
 	public slots:
 		void disableThread();
@@ -57,7 +60,10 @@ class InterfaceROS: public QThread
 														const double &minTheta,
 														const double &maxTheta,
 														const double &AcTime,
-														const unsigned int &Npts);
+														const unsigned int &Npts,
+														const unsigned int &Nech,
+														const unsigned int &freqCLK,
+														const unsigned int &freqech);
 
 	private:
 			//Attributs

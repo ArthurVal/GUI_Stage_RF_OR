@@ -25,12 +25,18 @@ InterfaceROS::InterfaceROS(int argc, char* argv[], QWidget* parent)
 																						const double&,
 																						const double&,
 																						const double&,
+																						const unsigned int&,
+																						const unsigned int&,
+																						const unsigned int&,
 																						const unsigned int&)),
 				 nodeROS	,	SLOT(getDataRF(	const double&,
 																		const double&,
 																		const double&,
 																		const double&,
 																		const double&,
+																		const unsigned int&,
+																		const unsigned int&,
+																		const unsigned int&,
 																		const unsigned int&))
 					, Qt::QueuedConnection);
 
@@ -66,9 +72,12 @@ void InterfaceROS::transfertStartRF(	const double &minPhi,
 														const double &minTheta,
 														const double &maxTheta,
 														const double &AcTime,
-														const unsigned int &Npts)
+														const unsigned int &Npts,
+														const unsigned int &Nech,
+														const unsigned int &freqCLK,
+														const unsigned int &freqech)
 {
-	emit transfertStartRFToNode(minPhi,maxPhi,minTheta,maxTheta,AcTime,Npts);
+	emit transfertStartRFToNode(minPhi,maxPhi,minTheta,maxTheta,AcTime,Npts,Nech,freqCLK,freqech);
 }
 
 /*========================================================================*/

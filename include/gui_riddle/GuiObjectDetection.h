@@ -52,7 +52,10 @@ class GuiObjectDetection: public QWidget
 															const double &minT,
 															const double &maxT,
 															const double &AcTime,
-															const unsigned int &Npts);
+															const unsigned int &Npts,
+															const unsigned int &Nech,
+															const unsigned int &freqTSCLK,
+															const unsigned int &freqech);
 		
 
 	public slots: 
@@ -77,7 +80,10 @@ class GuiObjectDetection: public QWidget
 		void updateMaxPhi();
 
 		void updateAcTime();
-		void updateNPoints(); 
+		void updateNPoints();
+		void updateNEchantillons();  
+		void updateFreqEchantillons();  
+		void updateFreqTSCLK();  
 
 		void updateIsRemote(const int &stateRemote); 
 		void updateThetaDisable(const int &stateThetaDis); 
@@ -106,7 +112,7 @@ class GuiObjectDetection: public QWidget
 			//Members of RF Parameters window
 		QTabWidget *tabParam;
 		QWidget *tabPageRF;
-		QLineEdit *line[6];
+		QLineEdit *line[8];
 		QPushButton *StartRFButton;
 		QProgressBar* progressBarRF;
 		QCheckBox* checkBoxRF[2];
@@ -127,7 +133,7 @@ class GuiObjectDetection: public QWidget
 		unsigned int GUI_OK;
 	
 		double minTheta, maxTheta, minPhi, maxPhi, acquisitionTime;
-		unsigned int nPoint;
+		unsigned int nPoint, freqTSCLK, freqEch, nEch;
 		bool isRemote;
 		bool thetaDisable;
 		bool isRunningRFAcquisition;

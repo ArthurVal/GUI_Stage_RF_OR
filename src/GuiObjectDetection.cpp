@@ -40,12 +40,18 @@ GuiObjectDetection::GuiObjectDetection(int argc, char* argv[], unsigned int n_la
 																						const double&,
 																						const double&,
 																						const double&,
+																						const unsigned int&,
+																						const unsigned int&,
+																						const unsigned int&,
 																						const unsigned int&)),
 				 	InterfaceROSGUI,	SLOT(transfertStartRF(	const double&,
 																										const double&,
 																										const double&,
 																										const double&,
 																										const double&,
+																										const unsigned int&,
+																										const unsigned int&,
+																										const unsigned int&,
 																										const unsigned int&))
 					);
 	
@@ -132,6 +138,12 @@ GuiObjectDetection::GuiObjectDetection(int argc, char* argv[], unsigned int n_la
 
 	acquisitionTime = 1;
 	nPoint = 360;
+	freqTSCLK = 30000000;
+	freqEch = 250000;
+	nEch = 400;
+
+
+
 
 	timerRF = new QTimer(this);
 
@@ -205,10 +217,7 @@ void GuiObjectDetection::setupGUI_1(char* path_rviz_config_file){
 
 			// ---- RF Param -----
 				// => Title
-	gridBoxParamRF->addWidget(labels[0],0,0,1,3);
-	QLabel *labelProgressBar = new QLabel();
-	labelProgressBar->setText("RF Acquisiiton Progress :");
-	labelProgressBar->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+	//gridBoxParamRF->addWidget(labels[0],0,0,1,3);
 
 				// => CheckBox Remote & Theta
 	QWidget* tmpWidgetCheckBox = new QWidget();
@@ -223,12 +232,25 @@ void GuiObjectDetection::setupGUI_1(char* path_rviz_config_file){
 	progressBarRF = new QProgressBar();
 	progressBarRF->setRange(0,1);
 	progressBarRF->setValue(1);
-	gridBoxParamRF->addWidget(labelProgressBar,1,0,1,3);
-	gridBoxParamRF->addWidget(progressBarRF,1,3,1,2);
+	QWidget* tmpWidgetProgressBar = new QWidget();
+	QVBoxLayout* tmpVBoxLayoutProgressBar = new QVBoxLayout();
+	tmpVBoxLayoutProgressBar->addWidget(labels[0]);
+	tmpVBoxLayoutProgressBar->addWidget(progressBarRF);
+	tmpWidgetProgressBar->setLayout(tmpVBoxLayoutProgressBar);		
+	gridBoxParamRF->addWidget(tmpWidgetProgressBar,0,0,1,3);//4,3,1,2
+
+/*
+	QWidget* tmpWidgetFreqECH = new QWidget();
+	QVBoxLayout* tmpVBoxLayoutFreqECH = new QVBoxLayout();
+	tmpVBoxLayoutFreqECH->addWidget(label_text[7]);
+	tmpVBoxLayoutFreqECH->addWidget(line[7]);
+	tmpWidgetFreqECH->setLayout(tmpVBoxLayoutFreqECH);
+	gridBoxParamRF->addWidget(tmpWidgetFreqECH,1,0,1,3);
+*/
 
 
 				// => Text for Edit
-	QLabel *label_text[6];
+	QLabel *label_text[8];
 	label_text[0] = new QLabel();
 	label_text[0]->setText("min");
 	label_text[0]->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
@@ -238,11 +260,11 @@ void GuiObjectDetection::setupGUI_1(char* path_rviz_config_file){
 	label_text[1]->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 
 	label_text[2] = new QLabel();
-	label_text[2]->setText("Duree (s)");
+	label_text[2]->setText("N_Points");
 	label_text[2]->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 
 	label_text[3] = new QLabel();
-	label_text[3]->setText("N_Points");
+	label_text[3]->setText("N_Echant");
 	label_text[3]->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 
 	label_text[4] = new QLabel();	
@@ -253,6 +275,14 @@ void GuiObjectDetection::setupGUI_1(char* path_rviz_config_file){
 	label_text[5]->setText(QChar(0x03B8)); //Theta
 	label_text[5]->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 
+	label_text[6] = new QLabel();
+	label_text[6]->setText("FrqCLK (Hz)");
+	label_text[6]->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+
+	label_text[7] = new QLabel();
+	label_text[7]->setText("FrqEch (Hz)");
+	label_text[7]->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+
 	gridBoxParamRF->addWidget(label_text[0],2,1,1,1);
 	gridBoxParamRF->addWidget(label_text[1],2,2,1,1);
 	gridBoxParamRF->addWidget(label_text[2],2,3,1,1);
@@ -261,11 +291,13 @@ void GuiObjectDetection::setupGUI_1(char* path_rviz_config_file){
 	gridBoxParamRF->addWidget(label_text[4],3,0,1,1);
 	gridBoxParamRF->addWidget(label_text[5],4,0,1,1);
 
+	//gridBoxParamRF->addWidget(label_text[6],1,1,1,1);
+	//gridBoxParamRF->addWidget(label_text[7],1,2,1,1);
 
 
 				// => Edit windows with parameters & validators	
 	QDoubleValidator *validator[5];
-	QIntValidator *validatorPoints;
+	QIntValidator *validatorPoints, *validatorEchantillons, *validatorFreqEchantillons, *validatorFreqCLK;
  
 		//min Phi
 	line[0] = new QLineEdit("-180");
@@ -303,30 +335,60 @@ void GuiObjectDetection::setupGUI_1(char* path_rviz_config_file){
 
 	gridBoxParamRF->addWidget(line[3],4,2,1,1);
  
-		//Duree
-	line[4] = new QLineEdit("1");
+		//N_Points
+	line[4] = new QLineEdit("360");
 	line[4]->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-	validator[4] = new QDoubleValidator(0, 60, 2); // from 0 -> 60s 
-	line[4]->setValidator(validator[4]);
-	connect(line[4], SIGNAL(editingFinished()), this, SLOT(updateAcTime()));
+	validatorPoints = new QIntValidator(0, 720); 
+	line[4]->setValidator(validatorPoints);
+	connect(line[4], SIGNAL(editingFinished()), this, SLOT(updateNPoints()));
 
 	gridBoxParamRF->addWidget(line[4],3,3,1,1);
  
-		//N_point
-	line[5] = new QLineEdit("360");
+		//N_Echant
+	line[5] = new QLineEdit("400");
 	line[5]->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-	validatorPoints = new QIntValidator(0, 720); 
-	line[5]->setValidator(validatorPoints);
-	connect(line[5], SIGNAL(editingFinished()), this, SLOT(updateNPoints()));
+	validatorEchantillons = new QIntValidator(1, 2500); 
+	line[5]->setValidator(validatorEchantillons);
+	connect(line[5], SIGNAL(editingFinished()), this, SLOT(updateNEchantillons()));
 
 	gridBoxParamRF->addWidget(line[5],3,4,1,1);
+
+		//Freq_TSCLK
+	line[6] = new QLineEdit("30000000");
+	line[6]->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+	validatorFreqCLK = new QIntValidator(1, 60000000); 
+	line[6]->setValidator(validatorFreqCLK);
+	connect(line[6], SIGNAL(editingFinished()), this, SLOT(updateFreqTSCLK()));
+	
+	//gridBoxParamRF->addWidget(line[5],3,4,1,1);
+	QWidget* tmpWidgetFreqTSCLK = new QWidget();
+	QVBoxLayout* tmpVBoxLayoutFreqTSCLK = new QVBoxLayout();
+	tmpVBoxLayoutFreqTSCLK->addWidget(label_text[6]);
+	tmpVBoxLayoutFreqTSCLK->addWidget(line[6]);
+	tmpWidgetFreqTSCLK->setLayout(tmpVBoxLayoutFreqTSCLK);
+	gridBoxParamRF->addWidget(tmpWidgetFreqTSCLK,1,3,1,2);
+
+		//Freq_Echantillon
+	line[7] = new QLineEdit("250000");
+	line[7]->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+	validatorFreqEchantillons = new QIntValidator(1, 500000); 
+	line[7]->setValidator(validatorFreqEchantillons);
+	connect(line[7], SIGNAL(editingFinished()), this, SLOT(updateFreqEchantillons()));
+	
+	//gridBoxParamRF->addWidget(line[5],3,4,1,1);
+	QWidget* tmpWidgetFreqECH = new QWidget();
+	QVBoxLayout* tmpVBoxLayoutFreqECH = new QVBoxLayout();
+	tmpVBoxLayoutFreqECH->addWidget(label_text[7]);
+	tmpVBoxLayoutFreqECH->addWidget(line[7]);
+	tmpWidgetFreqECH->setLayout(tmpVBoxLayoutFreqECH);
+	gridBoxParamRF->addWidget(tmpWidgetFreqECH,1,0,1,3);
 
 
 				// => Start Button
 	StartRFButton = new QPushButton("Start RF");
 	connect( StartRFButton, SIGNAL(clicked()), this, SLOT(startAcquisition()) );
 
-	gridBoxParamRF->addWidget(StartRFButton,4,3,1,2);
+	gridBoxParamRF->addWidget(StartRFButton,4,3,1,2); //1,3,1,2
 
 	gridBoxParamRF->setColumnStretch(0,1);
 	for(int i = 1 ; i < 5 ; ++i )		
@@ -427,13 +489,14 @@ void GuiObjectDetection::updateRFData(int index, const QVector<double> &x_phi, c
 
 void GuiObjectDetection::runningRFActivity(const bool &isRunning)
 {
+	
 	if(isRunning && !timerRFtimeout){ //Ask for running & no timer active (normal start activity)
 		isRunningRFAcquisition = true;
 		checkBoxRF[0]->setEnabled(false);
 		checkBoxRF[1]->setEnabled(false);
 		StartRFButton->setEnabled(false);
 		progressBarRF->setRange(0,0);
-		timerRF->start((int)(2 * acquisitionTime*1000));
+		timerRF->start((int)(3 * acquisitionTime));
 
 	}else{
 
@@ -462,11 +525,11 @@ void GuiObjectDetection::runningRFActivity(const bool &isRunning)
 				checkBoxRF[1]->setEnabled(false);
 				StartRFButton->setEnabled(false);
 				progressBarRF->setRange(0,0);
-				timerRF->start((int)(2 * acquisitionTime*1000));
+				timerRF->start((int)(3 * acquisitionTime));
 			}
 		}
 	}
-
+	//std::cout << "[COUCOU][DEBUG] (3 * ((1.0/(double)freqEch) * nEch * nPoint) * 1000) = " <<(3 * ((1.0/(double)freqEch) * nEch * nPoint) * 1000) << std::endl;
 
 }
 
@@ -604,6 +667,7 @@ void GuiObjectDetection::updateMaxPhi()
 	//std::cout << "[GUI RIDDLE] [DEBUG] Slot GUI -> Phi : "<< Phi << "  ->maxPhi : " << maxPhi << std::endl;	
 }
 
+
 /*=============================================================================*/
 /*-----------		SLOT : GuiObjectDetection::updateAcTime()		-----------------*/
 /*=============================================================================*/
@@ -621,10 +685,45 @@ void GuiObjectDetection::updateAcTime()
 
 void GuiObjectDetection::updateNPoints()
 {
-	QString NPts = line[5]->text();
+	QString NPts = line[4]->text();
  	nPoint = NPts.toInt();
 	//std::cout << "[GUI RIDDLE] [DEBUG] Slot GUI -> nPoint : "<< nPoint << std::endl;	
 }
+
+/*=============================================================================*/
+/*-----------		SLOT : GuiObjectDetection::updateNEchantillons()		-----------*/
+/*=============================================================================*/
+
+void GuiObjectDetection::updateNEchantillons()
+{
+	QString NPts = line[5]->text();
+ 	nEch = NPts.toInt();
+	//std::cout << "[GUI RIDDLE] [DEBUG] Slot GUI -> nPoint : "<< nPoint << std::endl;	
+}
+
+/*=============================================================================*/
+/*-----------		SLOT : GuiObjectDetection::updateFreqTSCLK()		-----------*/
+/*=============================================================================*/
+
+void GuiObjectDetection::updateFreqTSCLK()
+{
+	QString NPts = line[6]->text();
+ 	freqTSCLK = NPts.toInt();
+	//std::cout << "[GUI RIDDLE] [DEBUG] Slot GUI -> nPoint : "<< nPoint << std::endl;	
+}
+
+/*=============================================================================*/
+/*-----------		SLOT : GuiObjectDetection::updateFreqEchantillons()		-----------*/
+/*=============================================================================*/
+
+void GuiObjectDetection::updateFreqEchantillons()
+{
+	QString NPts = line[7]->text();
+ 	freqEch = NPts.toInt();
+	//std::cout << "[GUI RIDDLE] [DEBUG] Slot GUI -> nPoint : "<< nPoint << std::endl;	
+}
+
+
 
 /*=============================================================================*/
 /*-----------		SLOT : GuiObjectDetection::updateIsRemote()		-----------------*/
@@ -681,6 +780,7 @@ void GuiObjectDetection::updateThetaDisable(const int &stateThetaDis)
 
 void GuiObjectDetection::startAcquisition()
 {
+	acquisitionTime = (int)(1000 * ((1.0/(double)freqEch) * nEch * nPoint));
 	std::cout << "[GUI RIDDLE] [DEBUG] Bouton clicked -> Start Acquisition" << std::endl;
 	std::cout << "[GUI RIDDLE] [DEBUG] Data transmitted" << std::endl;
 	std::cout << "[GUI RIDDLE] [DEBUG] minPhi = " << minPhi << std::endl;
@@ -689,9 +789,12 @@ void GuiObjectDetection::startAcquisition()
 	std::cout << "[GUI RIDDLE] [DEBUG] maxTheta = " << maxTheta << std::endl;
 	std::cout << "[GUI RIDDLE] [DEBUG] acquisitionTime = " << acquisitionTime << std::endl;
 	std::cout << "[GUI RIDDLE] [DEBUG] nPoint = " << nPoint << std::endl;
-
+	std::cout << "[GUI RIDDLE] [DEBUG] nEch = " << nEch << std::endl;
+	std::cout << "[GUI RIDDLE] [DEBUG] freqTSCLK = " << freqTSCLK << std::endl;
+	std::cout << "[GUI RIDDLE] [DEBUG] freqEch = " << freqEch << std::endl;
+	
 	if(isRemote)
 		this->runningRFActivity(true);
 
-	emit startRFAcquisition(minPhi,maxPhi,minTheta,maxTheta,acquisitionTime,nPoint);
+	emit startRFAcquisition(minPhi,maxPhi,minTheta,maxTheta,acquisitionTime,nPoint,nEch,freqTSCLK,freqEch);
 }
